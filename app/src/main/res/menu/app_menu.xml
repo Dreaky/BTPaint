@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/save_svg"
+        android:title="@string/save_file"
+        app:showAsAction="never"
+        android:icon="@drawable/custom_save_icon"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/open_svg"
+        android:title="@string/open_file"
+        app:showAsAction="never"
+        android:icon="@drawable/custom_folder_icon"
+        android:visible="true">
+    </item>
+</menu>

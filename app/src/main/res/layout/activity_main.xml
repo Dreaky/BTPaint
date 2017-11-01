@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="majapp.bluetoothpaint.MainActivity"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/sidePanelLinearLayout"
+        android:layout_width="@dimen/side_panel_width"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:orientation="vertical">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/side_panel_width" />
+        <ImageButton
+            android:id="@+id/drawPathButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@color/colorDrawButtonClicked"
+            android:onClick="drawPathButton_Click"
+            android:padding="@dimen/side_panel_button_padding"
+            android:scaleType="centerCrop"
+            android:src="@drawable/custom_path"/>
+        <ImageButton
+            android:id="@+id/drawLineButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@color/colorDrawButtonNotClicked"
+            android:onClick="drawLineButton_Click"
+            android:padding="@dimen/side_panel_button_padding"
+            android:scaleType="centerCrop"
+            android:layout_marginTop="@dimen/side_panel_spaceHeight"
+            android:src="@drawable/custom_diagonal_line"/>
+        <ImageButton
+            android:id="@+id/drawRectangleButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@color/colorDrawButtonNotClicked"
+            android:onClick="drawRectangleButton_Click"
+            android:padding="@dimen/side_panel_button_padding"
+            android:layout_marginTop="@dimen/side_panel_spaceHeight"
+            android:scaleType="centerCrop"
+            android:src="@drawable/custom_rectangle"/>
+        <ImageButton
+            android:id="@+id/drawCircleButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@color/colorDrawButtonNotClicked"
+            android:onClick="drawCircleButton_Click"
+            android:padding="@dimen/side_panel_button_padding"
+            android:layout_marginTop="@dimen/side_panel_spaceHeight"
+            android:scaleType="centerCrop"
+            android:src="@drawable/custom_circle"/>
+        <ImageButton
+            android:id="@+id/drawPolygonButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:background="@color/colorDrawButtonNotClicked"
+            android:onClick="drawPolygonButton_Click"
+            android:padding="@dimen/side_panel_button_padding"
+            android:layout_marginTop="@dimen/side_panel_spaceHeight"
+            android:scaleType="centerCrop"
+            android:src="@drawable/custom_polygon"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/upPanelLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/side_panel_width"
+            android:background="#FFFFFF"
+            android:gravity="left">
+
+            <View
+                android:layout_width="@dimen/side_panel_spaceHeight"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark" />
+
+            <ImageButton
+                android:id="@+id/strokeColorButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:background="@color/colorDrawButtonNotClicked"
+                android:onClick="strokeColorButton_Click"
+                android:padding="20dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/custom_strokecolor" />
+
+            <View
+                android:layout_width="@dimen/side_panel_spaceHeight"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark" />
+
+            <ImageButton
+                android:id="@+id/fillColorButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:background="@color/colorDrawButtonNotClicked"
+                android:onClick="fillColorButton_Click"
+                android:padding="20dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/custom_fillcolor" />
+
+            <View
+                android:layout_width="@dimen/side_panel_spaceHeight"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark" />
+
+            <ImageButton
+                android:id="@+id/strokeWidthButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:background="@color/colorDrawButtonNotClicked"
+                android:onClick="strokeWidthButton_Click"
+                android:padding="20dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/custom_line_width" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimaryDark" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/canvasLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <majapp.bluetoothpaint.DrawingView
+                android:id="@+id/drawingView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/strokeWidthLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <ImageButton
+                    android:id="@+id/strokeWidth1Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.20"
+                    android:alpha="1"
+                    android:backgroundTint="@color/colorDrawButtonClicked"
+                    android:clickable="true"
+                    android:onClick="strokeWidth1Button_Click"
+                    android:src="@drawable/custom_line_1" />
+
+                <ImageButton
+                    android:id="@+id/strokeWidth2Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.20"
+                    android:alpha="1"
+                    android:backgroundTint="@color/colorDrawButtonNotClicked"
+                    android:clickable="true"
+                    android:onClick="strokeWidth2Button_Click"
+                    android:src="@drawable/custom_line_2" />
+
+                <ImageButton
+                    android:id="@+id/strokeWidth3Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.20"
+                    android:alpha="1"
+                    android:backgroundTint="@color/colorDrawButtonNotClicked"
+                    android:clickable="true"
+                    android:onClick="strokeWidth3Button_Click"
+                    android:src="@drawable/custom_line_3" />
+
+                <ImageButton
+                    android:id="@+id/strokeWidth4Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.20"
+                    android:alpha="1"
+                    android:backgroundTint="@color/colorDrawButtonNotClicked"
+                    android:onClick="strokeWidth4Button_Click"
+                    android:src="@drawable/custom_line_4" />
+
+                <ImageButton
+                    android:id="@+id/strokeWidth5Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.20"
+                    android:alpha="1"
+                    android:backgroundTint="@color/colorDrawButtonNotClicked"
+                    android:onClick="strokeWidth5Button_Click"
+                    android:src="@drawable/custom_line_5" />
+            </LinearLayout>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/undoActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_margin="10dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="undoActionButton_Click"
+                android:src="@drawable/custom_undo"
+                app:backgroundTint="@color/colorActionButton" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/toolsActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_margin="10dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="toolsActionButton_Click"
+                android:src="@drawable/custom_path"
+                app:backgroundTint="@color/colorActionButton" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/createPolygonActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="10dp"
+                android:layout_toLeftOf="@id/toolsActionButton"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="createPolygonActionButton_Click"
+                android:src="@drawable/ok_mark"
+                app:backgroundTint="#00BB00" />
+
+            <LinearLayout
+                android:id="@+id/saveFileLinearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="20dp"
+                android:background="#DDDDDD"
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Názov SVG súboru:" />
+
+                <EditText
+                    android:id="@+id/fileNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:hint="@string/hint"/>
+
+                <TextView
+                    android:id="@+id/errorMessageTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:textColor="#FF0000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="horizontal">
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/confirmSavingActionButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginRight="12dp"
+                        android:alpha="1"
+                        android:clickable="true"
+                        android:onClick="confirmSavingActionButton_Click"
+                        android:src="@drawable/ok_mark"
+                        app:backgroundTint="#00BB00" />
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/cancelSavingActionButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp"
+                        android:alpha="1"
+                        android:clickable="true"
+                        android:onClick="cancelSavingActionButton_Click"
+                        android:src="@drawable/custom_close_cross"
+                        app:backgroundTint="#DD0000" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

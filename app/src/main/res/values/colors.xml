@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorSidePanel">#D5D6FF</color>
+    <color name="colorDrawButtonNotClicked">#F5F6F7</color>
+    <color name="colorDrawButtonClicked">#B4B5B6</color>
+    <color name="colorActionButton">#AAAAAA</color>
+</resources>
+
