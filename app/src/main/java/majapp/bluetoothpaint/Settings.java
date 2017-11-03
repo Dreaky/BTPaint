@@ -1,5 +1,8 @@
 package majapp.bluetoothpaint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Settings {
     private float strokeWidth;
     private String stroke;
@@ -9,6 +12,7 @@ public class Settings {
     private ShapesEnum shape;
     private float strokeOpacity;
     private float fillOpacity;
+    private List<String> svgElements;
 
     public Settings() {
         strokeWidth = 1.0f;
@@ -19,6 +23,7 @@ public class Settings {
         shape = ShapesEnum.PATH;
         strokeOpacity = 1.0f;
         fillOpacity= 1.0f;
+        svgElements = new ArrayList<String>();
     }
 
     public void setStrokeWidth(float value){strokeWidth = value;}
@@ -44,4 +49,7 @@ public class Settings {
 
     public void setFillOpacity(float value){fillOpacity = value;}
     public float getFillOpacity(){return fillOpacity;}
+
+    public void setSvgElements(List<String> value){svgElements = value;}
+    public List<String> getSvgElements(){return svgElements;}
 }

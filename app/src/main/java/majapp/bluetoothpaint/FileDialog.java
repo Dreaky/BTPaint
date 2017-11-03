@@ -59,12 +59,16 @@ public class FileDialog {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         TextView textView = new TextView(activity);
         textView.setTextColor(Color.BLACK);
-        textView.setText("VÝBER PRIEČINKA:\n" + currentPath.getPath());
+        if(selectDirectoryOption)
+            textView.setText("VÝBER PRIEČINKA:\n" + currentPath.getPath());
+        else
+            textView.setText("VÝBER SÚBORU:\n" + currentPath.getPath());
         builder.setCustomTitle(textView);
 
         //builder.setTitle("Výber priečinka:\n" + currentPath.getPath());
         if (selectDirectoryOption) {
-            builder.setPositiveButton("Vybrať priečinok", new DialogInterface.OnClickListener() {
+            String folder = currentPath.getPath().substring(currentPath.getPath().lastIndexOf('/') + 1);
+            builder.setPositiveButton("Vybrať priečinok " + folder, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     Log.d(TAG, currentPath.getPath());
                     fireDirectorySelectedEvent(currentPath);

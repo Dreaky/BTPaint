@@ -87,11 +87,6 @@
             android:background="#FFFFFF"
             android:gravity="left">
 
-            <View
-                android:layout_width="@dimen/side_panel_spaceHeight"
-                android:layout_height="match_parent"
-                android:background="@color/colorPrimaryDark" />
-
             <ImageButton
                 android:id="@+id/strokeColorButton"
                 android:layout_width="wrap_content"

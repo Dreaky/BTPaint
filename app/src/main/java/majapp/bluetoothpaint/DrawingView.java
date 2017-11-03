@@ -262,12 +262,18 @@ public class DrawingView extends View
     }
 
     public void Undo(){
-        int lastItemIndex = svgElements.size() - 1;
-        if(lastItemIndex >= 0) {
-            svgElements.remove(lastItemIndex);
-            svgElement = "";
-            invalidate();
+        if(polygonPoints.size() > 0) {
+            polygonPoints.remove(polygonPoints.size() - 1);
         }
+        else{
+            int lastItemIndex = svgElements.size() - 1;
+            if(lastItemIndex >= 0) {
+                svgElements.remove(lastItemIndex);
+                svgElement = "";
+            }
+        }
+
+        invalidate();
     }
 
     public String GetSvgString(){
@@ -288,6 +294,15 @@ public class DrawingView extends View
 
     public void AddSvgElement(String line){
         svgElements.add(line);
+    }
+
+    public void SetSvgElements(List<String> svgElements){
+        this.svgElements = svgElements;
+        invalidate();
+    }
+
+    public List<String> GetSvgElements(){
+        return svgElements;
     }
 
     private void DrawPolygonPoints(Canvas canvas){

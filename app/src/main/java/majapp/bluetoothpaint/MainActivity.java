@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private static final float factor = 1/255.0f;
     private EditText fileNameEditText;
     private TextView errorMessageTextView;
-    private DrawingView dravingView;
+    private DrawingView drawingView;
     private LinearLayout sidePanelLinearLayout;
     private LinearLayout upPanelLinearLayout;
     private LinearLayout strokeWidthLinearLayout;
@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
         InitializeSettings();
         InitializeViews();
+        InitializeUserSettings();
 
         fileNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(IsAplanumeric(s.toString())){
+                if(IsAlphanumeric(s.toString())){
                     errorMessageTextView.setText("");
                 }
                 else{
@@ -129,24 +130,24 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     public void undoActionButton_Click(View view){
-        dravingView.Undo();
+        drawingView.Undo();
     }
 
     public void createPolygonActionButton_Click(View view){
-        dravingView.CreatePolygon();
+        drawingView.CreatePolygon();
     }
 
     public void confirmSavingActionButton_Click(View view){
         String fileName = fileNameEditText.getText().toString();
 
-        if(IsAplanumeric(fileName)){
+        if(IsAlphanumeric(fileName)){
             if(fileName.length() <= 0){
                 errorMessageTextView.setText(R.string.empty_filename);
             }
             else{
                 SaveSvgFile(fileName);
                 saveFileLinearLayout.setVisibility(View.GONE);
-                dravingView.setEnabled(true);
+                drawingView.setEnabled(true);
                 if(isToolsActionButtonClicked){
                     sidePanelLinearLayout.setVisibility(View.VISIBLE);
                     upPanelLinearLayout.setVisibility(View.VISIBLE);
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void cancelSavingActionButton_Click(View view){
         selectedDirectory = "";
         saveFileLinearLayout.setVisibility(View.GONE);
-        dravingView.setEnabled(true);
+        drawingView.setEnabled(true);
         if(isToolsActionButtonClicked){
             sidePanelLinearLayout.setVisibility(View.VISIBLE);
             upPanelLinearLayout.setVisibility(View.VISIBLE);
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     public void drawPathButton_Click(View view) {
-        dravingView.ClearPolygonPointsList();
+        drawingView.ClearPolygonPointsList();
         SetButtonsBackground(drawPathButton);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.PATH);
         toolsActionButton.setImageResource(R.drawable.custom_path);
@@ -181,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     public void drawLineButton_Click(View view) {
-        dravingView.ClearPolygonPointsList();
+        drawingView.ClearPolygonPointsList();
         SetButtonsBackground(drawLineButton);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.LINE);
         toolsActionButton.setImageResource(R.drawable.custom_diagonal_line);
@@ -189,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     public void drawRectangleButton_Click(View view) {
-        dravingView.ClearPolygonPointsList();
+        drawingView.ClearPolygonPointsList();
         SetButtonsBackground(drawRectangleButton);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.RECTAGLE);
         toolsActionButton.setImageResource(R.drawable.custom_rectangle);
@@ -197,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     public void drawCircleButton_Click(View view) {
-        dravingView.ClearPolygonPointsList();
+        drawingView.ClearPolygonPointsList();
         SetButtonsBackground(drawCircleButton);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.CIRCLE);
         toolsActionButton.setImageResource(R.drawable.custom_circle);
@@ -280,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     private void InitializeViews()
     {
-        dravingView = (DrawingView)findViewById(R.id.drawingView);
+        drawingView = (DrawingView)findViewById(R.id.drawingView);
         fileNameEditText = (EditText)findViewById(R.id.fileNameEditText);
         errorMessageTextView = (TextView)findViewById(R.id.errorMessageTextView);
 
@@ -343,9 +344,14 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     //override methods for custom color picker
 
-    @Override public void onColorSelected(int dialogId, int color) {
+    @Override
+    public void onColorSelected(int dialogId, int color) {
         String hexColorWithOpacity = "#" + Integer.toHexString(color);
-        String hexColor = "#" + hexColorWithOpacity.substring(3, 9);
+        if(hexColorWithOpacity.length() == 8)
+            hexColorWithOpacity = hexColorWithOpacity.replace("#", "#0");
+        else if(hexColorWithOpacity.length() == 7)
+            hexColorWithOpacity = hexColorWithOpacity.replace("#", "#00");
+        String hexColor = "#" + hexColorWithOpacity.substring(3, hexColorWithOpacity.length());
         float opacity = Color.alpha(color) * factor;
         switch (dialogId) {
             case STROKE_DIALOG_ID:
@@ -373,12 +379,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.save_svg:
-                if(isToolsActionButtonClicked){
-                    sidePanelLinearLayout.setVisibility(View.GONE);
-                    upPanelLinearLayout.setVisibility(View.GONE);
-                }
-                if(isStrokeWidthButtonClicked)
-                    strokeWidthLinearLayout.setVisibility(View.GONE);
                 SaveSvgFile();
                 return true;
             case R.id.open_svg:
@@ -394,8 +394,14 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         fileDialog.setSelectDirectoryOption(true);
         fileDialog.addDirectoryListener(new FileDialog.DirectorySelectedListener() {
             public void directorySelected(File directory) {
+                if(isToolsActionButtonClicked){
+                    sidePanelLinearLayout.setVisibility(View.GONE);
+                    upPanelLinearLayout.setVisibility(View.GONE);
+                }
+                if(isStrokeWidthButtonClicked)
+                    strokeWidthLinearLayout.setVisibility(View.GONE);
                 saveFileLinearLayout.setVisibility(View.VISIBLE);
-                dravingView.setEnabled(false);
+                drawingView.setEnabled(false);
                 selectedDirectory = directory.toString();
                 Log.d(getClass().getName(), "selected dir " + directory.toString());
             }
@@ -405,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     private void SaveSvgFile(String fileName){
         fileName = selectedDirectory + "/" + fileName + ".svg";
-        String content = dravingView.GetSvgString();
+        String content = drawingView.GetSvgString();
         FileOutputStream outputStream;
 
         try {
@@ -451,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             }
             else{
                 try {
-                    dravingView.Restart();
+                    drawingView.Restart();
                     FileInputStream inputStream = new FileInputStream(file);
                     InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -460,13 +466,13 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                     while ((line = bufferedReader.readLine()) != null) {
                         if(line.startsWith("<path") || line.startsWith("<line") || line.startsWith("<rect") ||
                                 line.startsWith("<circle") || line.startsWith("<polygon")) {
-                            dravingView.AddSvgElement(line);
+                            drawingView.AddSvgElement(line);
                         }
 //                        sb.append(line);
 //                        sb.append(System.lineSeparator());
                     }
                     inputStream.close();
-                    dravingView.invalidate();
+                    drawingView.invalidate();
 //                    String result = sb.toString();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -481,8 +487,56 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         return result;
     }
 
-    private boolean IsAplanumeric(String string){
+    private boolean IsAlphanumeric(String string){
         Pattern p = Pattern.compile("[^a-zA-Z0-9]");
         return !p.matcher(string).find();
+    }
+
+    //pomocne funkcie, aby som pri rotacii nestracal data a zvolene nastavenia
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(SettingsHolder.getInstance().getSettings() == null)
+            return;
+        SettingsHolder.getInstance().getSettings().setSvgElements(drawingView.GetSvgElements());
+    }
+
+    private void InitializeUserSettings(){
+        if(SettingsHolder.getInstance().getSettings() == null)
+            return;
+
+        switch(SettingsHolder.getInstance().getSettings().getShape()){
+            case PATH:
+                SetButtonsBackground(drawPathButton);
+                break;
+            case LINE:
+                SetButtonsBackground(drawLineButton);
+                break;
+            case RECTAGLE:
+                SetButtonsBackground(drawRectangleButton);
+                break;
+            case CIRCLE:
+                SetButtonsBackground(drawCircleButton);
+                break;
+            case POLYGON:
+                SetButtonsBackground(drawPolygonButton);
+                createPolygonActionButton.setVisibility(View.VISIBLE);
+                break;
+        }
+
+        float strokeWidth = SettingsHolder.getInstance().getSettings().getStrokeWidth();
+        if(strokeWidth == 1.0f)
+            SetStrokeWidthButtonsBackground(strokeWidth1Button);
+        else if(strokeWidth == 3.0f)
+            SetStrokeWidthButtonsBackground(strokeWidth2Button);
+        else if(strokeWidth == 5.0f)
+            SetStrokeWidthButtonsBackground(strokeWidth3Button);
+        else if(strokeWidth == 7.0f)
+            SetStrokeWidthButtonsBackground(strokeWidth4Button);
+        else if(strokeWidth == 9.0f)
+            SetStrokeWidthButtonsBackground(strokeWidth5Button);
+
+
+        drawingView.SetSvgElements(SettingsHolder.getInstance().getSettings().getSvgElements());
     }
 }
