@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.PointF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -32,12 +33,11 @@ public class DrawingView extends View
     private List<PointF> polygonPoints;
     private Paint drawPaint;
     private int paintColor;
+    private BluetoothService btService = null;
 
 
     private String svgHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?><!-- Generator: Adobe Illustrator 13.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 14948)  --><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\t width=\"0px\" height=\"0px\" viewBox=\"0 0 0 0\" enable-background=\"new 0 0 0 0\" xml:space=\"preserve\"><g id=\"android\">";
-
     private String svgElement = "";
-
     private String svgFoot = "\n</g></svg>";
 
     public DrawingView(Context context, AttributeSet attrs){
@@ -51,6 +51,9 @@ public class DrawingView extends View
     }
 
     private void setupDrawing(){
+        //https://stackoverflow.com/questions/10384613/android-canvas-drawpicture-not-working-in-devices-with-ice-cream-sandwich
+        if(android.os.Build.VERSION.SDK_INT <= 22)
+            this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         svgElements = new ArrayList<String>();
         polygonPoints = new ArrayList<PointF>();
         drawPaint = new Paint();
@@ -60,6 +63,10 @@ public class DrawingView extends View
         drawPaint.setStyle(Paint.Style.FILL);
         drawPaint.setColor(paintColor);
 
+    }
+
+    public void SetBluetoothService(BluetoothService service){
+        btService = service;
     }
 
     @Override
@@ -74,21 +81,28 @@ public class DrawingView extends View
         // Parse the SVG file from the resource
         String svgBody = "";
         for (String element: svgElements) {
-            svgBody += "\n" + element;
+            if(element.endsWith("/>"))
+                svgBody += "\n" + element;
+            else
+                Log.e("CHYBNY ELEMENT:", "CHYBNY ELEMENT: " + element);
         }
 
-        SVG svg = SVGParser.getSVGFromString(svgHeader + svgBody + svgElement + svgFoot);
-        // Get the picture
-        Picture picture = svg.getPicture();
-        // Draw picture in canvas
-        // Note: use transforms such as translate, scale and rotate to position the picture correctly
-        canvas.drawPicture(picture);
+        Log.e("SVGBODY", svgHeader + svgBody + svgElement + svgFoot);
 
-        DrawPolygonPoints(canvas);
+        SVG svg;
+        try {
+            svg = SVGParser.getSVGFromString(svgHeader + svgBody + svgElement + svgFoot);
+            // Get the picture
+            Picture picture = svg.getPicture();
+            // Draw picture in canvas
+            // Note: use transforms such as translate, scale and rotate to position the picture correctly
+            canvas.drawPicture(picture);
 
-//        draw det sit as begraund
-//        PictureDrawable tmp = new PictureDrawable(picture);
-//        this.setBackground(tmp);
+            DrawPolygonPoints(canvas);
+        }
+        catch(Exception ex) {
+            Log.e("CHYBA", "svgString :-> " + svgHeader + svgBody + svgElement + svgFoot);
+        }
     }
 
     @Override
@@ -110,7 +124,7 @@ public class DrawingView extends View
                     UpdateSvgBody();
                     break;
                 case MotionEvent.ACTION_UP:
-                    svgElements.add(svgElement);
+                    AddSvgElement();
                     break;
                 default:
                     return false;
@@ -250,7 +264,7 @@ public class DrawingView extends View
         AddFillOpacity();
         AddEndTag();
 
-        svgElements.add(svgElement);
+        AddSvgElement();
 
         polygonPoints.clear();
         invalidate();
@@ -273,16 +287,18 @@ public class DrawingView extends View
             }
         }
 
+        if(CanSendData()){
+            btService.write(Constants.UNDO.getBytes());
+        }
+
         invalidate();
     }
 
     public String GetSvgString(){
         StringBuilder sb = new StringBuilder();
-        String svgBody = "";
         for (String element: svgElements) {
             sb.append(System.lineSeparator());
             sb.append(element);
-            //svgBody += "\n" + element;
         }
         return svgHeader + sb.toString() + svgElement + svgFoot;
     }
@@ -349,5 +365,19 @@ public class DrawingView extends View
 
     private float GetDistance(){
         return (float)Math.sqrt(Math.pow(startX - endX, 2) + Math.pow(startY - endY, 2));
+    }
+
+    private boolean CanSendData(){
+        return
+                (btService != null) &&
+                SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
+                SettingsHolder.getInstance().getSettings().getSendData();
+    }
+
+    private void AddSvgElement(){
+        svgElements.add(svgElement);
+        if(CanSendData()){
+            btService.write(svgElement.getBytes());
+        }
     }
 }

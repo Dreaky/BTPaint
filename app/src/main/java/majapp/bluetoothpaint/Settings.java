@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Settings {
+    // Paint
     private float strokeWidth;
     private String stroke;
     private String fill;
@@ -14,7 +15,12 @@ public class Settings {
     private float fillOpacity;
     private List<String> svgElements;
 
+    //Bluetooth
+    private boolean isTurnedOn;
+    private boolean sendData;
+
     public Settings() {
+        // Paint
         strokeWidth = 1.0f;
         stroke = "#FF0000";
         fill = "#00FF00";
@@ -24,8 +30,13 @@ public class Settings {
         strokeOpacity = 1.0f;
         fillOpacity= 1.0f;
         svgElements = new ArrayList<String>();
+
+        // Bluetooth
+        isTurnedOn = false;
+        sendData = true;
     }
 
+    // Paint
     public void setStrokeWidth(float value){strokeWidth = value;}
     public float getStrokeWidth(){return strokeWidth;}
 
@@ -52,4 +63,11 @@ public class Settings {
 
     public void setSvgElements(List<String> value){svgElements = value;}
     public List<String> getSvgElements(){return svgElements;}
+
+    // Bluetooth
+    public void setIsTurnedOn(boolean value){isTurnedOn = value;}
+    public boolean getIsTurnedOn(){return isTurnedOn;}
+
+    public void setSendData(boolean value){sendData = value;}
+    public boolean getSendData(){return sendData;}
 }

@@ -1,9 +1,16 @@
 package majapp.bluetoothpaint;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,6 +41,7 @@ import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements ColorPickerDialogListener {
+    private static final int REQUEST_CONNECT_DEVICE = 10;
     private static final int STROKE_DIALOG_ID = 0;
     private static final int FILL_DIALOG_ID = 1;
     private static final float factor = 1/255.0f;
@@ -68,10 +76,18 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private String rootDirectory;
     private String selectedDirectory = "";
 
+    //Name of the connected device
+    private String connectedDeviceName = null;
+     //String buffer for outgoing messages
+    private StringBuffer outStringBuffer;
+    private BluetoothAdapter bluetoothAdapter = null;
+    public static BluetoothService btService = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         InitializeSettings();
         InitializeViews();
@@ -99,6 +115,125 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             }
         });
     }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (btService == null) {
+            SetupService();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (btService != null) {
+            btService.stop();
+        }
+    }
+
+//    public static void TmpResume(){
+//        if (btService == null) {
+//            SetupService();
+//        }
+//
+//        if (btService != null) {
+//            // Only if the state is STATE_NONE, do we know that we haven't started already
+//            if (btService.getState() == BluetoothService.STATE_NONE) {
+//                // Start the Bluetooth chat services
+//                btService.start();
+//            }
+//        }
+//    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Performing this check in onResume() covers the case in which BT was
+        // not enabled during onStart(), so we were paused to enable it...
+        // onResume() will be called when REQUEST_CONNECT_DEVICE activity returns.
+        if (btService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+            if (btService.getState() == BluetoothService.STATE_NONE) {
+                // Start the Bluetooth chat services
+                btService.start();
+            }
+        }
+    }
+
+    private void SetupService(){
+        // Initialize the BluetoothService to perform bluetooth connections
+        if (btService == null)
+            btService = new BluetoothService(this, mHandler);
+        drawingView.SetBluetoothService(btService);
+    }
+
+    private void setStatus(CharSequence subTitle) {
+        final ActionBar actionBar = getSupportActionBar();
+        if (null == actionBar) {
+            return;
+        }
+        actionBar.setSubtitle(subTitle);
+    }
+
+    private String receivedXmlElement = "";
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Constants.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case BluetoothService.STATE_CONNECTED:
+                            setStatus(getString(R.string.title_connected_to, connectedDeviceName));
+//                            mConversationArrayAdapter.clear();
+                            break;
+                        case BluetoothService.STATE_CONNECTING:
+                            setStatus(getString(R.string.title_connecting));
+                            break;
+                        case BluetoothService.STATE_LISTEN:
+                        case BluetoothService.STATE_NONE:
+                            setStatus(getString(R.string.title_not_connected));
+                            break;
+                    }
+                    break;
+                case Constants.MESSAGE_WRITE:
+//                    byte[] writeBuf = (byte[]) msg.obj;
+//                    // construct a string from the buffer
+//                    String writeMessage = new String(writeBuf);
+                    //TODO: Treba tu nieco robit? (nie)
+                    break;
+                case Constants.MESSAGE_READ:
+                    if(!SettingsHolder.getInstance().getSettings().getSendData()){
+                        byte[] readBuf = (byte[]) msg.obj;
+                        // construct a string from the valid bytes in the buffer
+                        String readMessage = new String(readBuf, 0, msg.arg1);
+                        if(!readMessage.endsWith("/>"))
+                            receivedXmlElement += readMessage;
+                        else{
+                            receivedXmlElement += readMessage;
+                            if(receivedXmlElement.equals(Constants.UNDO))
+                                drawingView.Undo();
+                            else{
+                                drawingView.AddSvgElement(receivedXmlElement);
+                                drawingView.invalidate();
+                            }
+                            receivedXmlElement = "";
+                        }
+                    }
+                    break;
+                case Constants.MESSAGE_DEVICE_NAME:
+                    // save the connected device's name
+                    connectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
+                        Toast.makeText(MainActivity.this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
+                    break;
+                case Constants.MESSAGE_TOAST:
+                        Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -383,6 +518,12 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 return true;
             case R.id.open_svg:
                 OpenSvgFile();
+                return true;
+            case R.id.open_bt_settings:
+                Intent intent = new Intent(this, BTSettingsActivity.class);
+                //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivityForResult(intent, REQUEST_CONNECT_DEVICE);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -461,19 +602,15 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                     FileInputStream inputStream = new FileInputStream(file);
                     InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                     BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-//                    StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
                         if(line.startsWith("<path") || line.startsWith("<line") || line.startsWith("<rect") ||
                                 line.startsWith("<circle") || line.startsWith("<polygon")) {
                             drawingView.AddSvgElement(line);
                         }
-//                        sb.append(line);
-//                        sb.append(System.lineSeparator());
                     }
                     inputStream.close();
                     drawingView.invalidate();
-//                    String result = sb.toString();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -490,6 +627,29 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private boolean IsAlphanumeric(String string){
         Pattern p = Pattern.compile("[^a-zA-Z0-9]");
         return !p.matcher(string).find();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CONNECT_DEVICE:
+                // When BTSettingsActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    SetupService();
+                    connectDevice(data, true);
+                }
+                break;
+        }
+    }
+
+    //Establish connection with other device
+    private void connectDevice(Intent data, boolean secure) {
+        // Get the device MAC address
+        String address = data.getExtras()
+                .getString(BTSettingsActivity.EXTRA_DEVICE_ADDRESS);
+        // Get the BluetoothDevice object
+        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+        btService.connect(device, secure);
     }
 
     //pomocne funkcie, aby som pri rotacii nestracal data a zvolene nastavenia
