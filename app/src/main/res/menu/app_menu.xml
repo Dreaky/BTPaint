@@ -19,7 +19,7 @@
         android:id="@+id/open_bt_settings"
         android:title="@string/bluetooth"
         app:showAsAction="never"
-        android:icon="@android:drawable/stat_sys_data_bluetooth"
+        android:icon="@drawable/custom_bluetooth"
         android:visible="true">
     </item>
 </menu>

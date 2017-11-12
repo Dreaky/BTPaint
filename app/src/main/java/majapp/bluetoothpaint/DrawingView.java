@@ -110,6 +110,10 @@ public class DrawingView extends View
         if(!isEnabled())
             return true;
 
+        if(SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
+                !SettingsHolder.getInstance().getSettings().getSendData())
+            return true;
+
         if(SettingsHolder.getInstance().getSettings().getShape() != ShapesEnum.POLYGON) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:

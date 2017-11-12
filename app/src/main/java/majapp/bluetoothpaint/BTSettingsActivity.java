@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -75,6 +76,7 @@ public class BTSettingsActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             //handle back button click
             case android.R.id.home:
+                onBackPressed();
                 this.finish();
                 return true;
             default:
@@ -84,9 +86,21 @@ public class BTSettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-//        if (true)
-//        else
         super.onBackPressed();
+//        Intent intent = new Intent();
+//        setResult(Constants.RESULT_CODE_BACK_PRESSED, intent);
+//        finish();
+    }
+
+    private void StartBluetoothServie(){
+        if (MainActivity.btService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+            if (MainActivity.btService.getState() == BluetoothService.STATE_NONE) {
+                // Start the Bluetooth chat services
+                if(bluetoothAdapter.isEnabled())
+                    MainActivity.btService.start();
+            }
+        }
     }
 
     private void InitializeViews(){
@@ -126,17 +140,10 @@ public class BTSettingsActivity extends AppCompatActivity {
                         EnableBtUIElements();
                         InitializeDevicesLists();
                         SettingsHolder.getInstance().getSettings().setIsTurnedOn(true);
-                        if (MainActivity.btService != null) {
-                            // Only if the state is STATE_NONE, do we know that we haven't started already
-                            if (MainActivity.btService.getState() == BluetoothService.STATE_NONE) {
-                                // Start the Bluetooth chat services
-                                MainActivity.btService.start();
-                            }
-                        }
+                        StartBluetoothServie();
                     } else {
                         DisableBtUIElements();
                         SettingsHolder.getInstance().getSettings().setIsTurnedOn(false);
-                        //TODO: Vypnut bluetooth ak je zapnuty
                         if (MainActivity.btService != null) {
                             MainActivity.btService.stop();
                         }
@@ -183,7 +190,7 @@ public class BTSettingsActivity extends AppCompatActivity {
                     btSwitch.setChecked(false);
                 }
                 else {
-
+                    StartBluetoothServie();
                 }
                 break;
         }
@@ -287,8 +294,12 @@ public class BTSettingsActivity extends AppCompatActivity {
             bluetoothAdapter.cancelDiscovery();
         }
 
+        try{
         // Unregister broadcast listeners
-        this.unregisterReceiver(mReceiver);
+        this.unregisterReceiver(mReceiver);}
+        catch(IllegalArgumentException e){
+            Log.e("UNREGISTER_RECEIVER", e.toString());
+        }
     }
 
     /**

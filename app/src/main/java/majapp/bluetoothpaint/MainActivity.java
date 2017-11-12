@@ -157,8 +157,9 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         if (btService != null) {
             // Only if the state is STATE_NONE, do we know that we haven't started already
             if (btService.getState() == BluetoothService.STATE_NONE) {
-                // Start the Bluetooth chat services
-                btService.start();
+                // Start the Bluetooth services
+                if(SettingsHolder.getInstance().getSettings().getIsTurnedOn())
+                    btService.start();
             }
         }
     }
@@ -199,10 +200,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
-//                    byte[] writeBuf = (byte[]) msg.obj;
-//                    // construct a string from the buffer
-//                    String writeMessage = new String(writeBuf);
-                    //TODO: Treba tu nieco robit? (nie)
                     break;
                 case Constants.MESSAGE_READ:
                     if(!SettingsHolder.getInstance().getSettings().getSendData()){
@@ -629,6 +626,35 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         return !p.matcher(string).find();
     }
 
+    private void TurnOnBTMode()
+    {
+        if(
+                SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
+                        !SettingsHolder.getInstance().getSettings().getSendData()
+                )
+            TurnOnIWantToStareMode();
+        else
+            TurnOnIWantToDrawMode();
+    }
+
+    private void TurnOnIWantToStareMode(){
+        sidePanelLinearLayout.setVisibility(View.GONE);
+        upPanelLinearLayout.setVisibility(View.GONE);
+        undoActionButton.setVisibility(View.GONE);
+        if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
+            createPolygonActionButton.setVisibility(View.GONE);
+        toolsActionButton.setVisibility(View.GONE);
+    }
+
+    private void TurnOnIWantToDrawMode(){
+        sidePanelLinearLayout.setVisibility(View.VISIBLE);
+        upPanelLinearLayout.setVisibility(View.VISIBLE);
+        undoActionButton.setVisibility(View.VISIBLE);
+        if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
+            createPolygonActionButton.setVisibility(View.VISIBLE);
+        toolsActionButton.setVisibility(View.VISIBLE);
+    }
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
@@ -636,6 +662,10 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 if (resultCode == Activity.RESULT_OK) {
                     SetupService();
                     connectDevice(data, true);
+                    TurnOnBTMode();
+                }
+                else{
+                    TurnOnBTMode();
                 }
                 break;
         }
