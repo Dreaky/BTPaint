@@ -298,6 +298,25 @@ public class DrawingView extends View
         invalidate();
     }
 
+    public void Redo(){
+        if(polygonPoints.size() > 0) {
+            polygonPoints.remove(polygonPoints.size() - 1);
+        }
+        else{
+            int lastItemIndex = svgElements.size() - 1;
+            if(lastItemIndex >= 0) {
+                svgElements.remove(lastItemIndex);
+                svgElement = "";
+            }
+        }
+
+        if(CanSendData()){
+            btService.write(Constants.UNDO.getBytes());
+        }
+
+        invalidate();
+    }
+
     public String GetSvgString(){
         StringBuilder sb = new StringBuilder();
         for (String element: svgElements) {

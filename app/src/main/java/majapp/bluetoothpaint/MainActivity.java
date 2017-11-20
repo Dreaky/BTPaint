@@ -25,7 +25,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,37 +47,47 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private EditText fileNameEditText;
     private TextView errorMessageTextView;
     private DrawingView drawingView;
-    private LinearLayout sidePanelLinearLayout;
-    private LinearLayout upPanelLinearLayout;
-    private LinearLayout strokeWidthLinearLayout;
+
+    //private LinearLayout upPanelLinearLayout;
     private LinearLayout saveFileLinearLayout;
-    private RelativeLayout canvasLayout;
+    private LinearLayout menuDrawingItems;
+    private LinearLayout menuSettingsItems;
+    private LinearLayout strokeWidthLinearLayout;
+
     private FloatingActionButton toolsActionButton;
-    private FloatingActionButton undoActionButton;
+    private FloatingActionButton settingActionButton;
     private FloatingActionButton createPolygonActionButton;
-    private FloatingActionButton confirmSavingActionButton;
-    private FloatingActionButton cancelSavingActionButton;
-    private ImageButton drawLineButton;
-    private ImageButton drawRectangleButton;
-    private ImageButton drawCircleButton;
-    private ImageButton drawPathButton;
-    private ImageButton drawPolygonButton;
-    private ImageButton strokeColorButton;
-    private ImageButton fillColorButton;
-    private ImageButton strokeWidthButton;
+    //private FloatingActionButton confirmSavingActionButton;
+    //private FloatingActionButton cancelSavingActionButton;
+    // right side menu
+    private FloatingActionButton buttonPencil;
+    private FloatingActionButton buttonLine;
+    private FloatingActionButton buttonShape;
+    private FloatingActionButton buttonCircle;
+    private FloatingActionButton buttonPolygon;
+
+    // left side menu
+    private FloatingActionButton buttonFill;
+    private FloatingActionButton buttonColor;
+    private FloatingActionButton buttonWidth;
+    private FloatingActionButton buttonRedo;
+    private FloatingActionButton buttonUndo;
+
+    // inner left side menu
     private ImageButton strokeWidth1Button;
     private ImageButton strokeWidth2Button;
     private ImageButton strokeWidth3Button;
     private ImageButton strokeWidth4Button;
     private ImageButton strokeWidth5Button;
+
     private boolean isStrokeWidthButtonClicked = false;
-    private boolean isToolsActionButtonClicked = true;
+    private boolean isSettingsActionButtonClicked = true;
     private String rootDirectory;
     private String selectedDirectory = "";
 
     //Name of the connected device
     private String connectedDeviceName = null;
-     //String buffer for outgoing messages
+    //String buffer for outgoing messages
     private StringBuffer outStringBuffer;
     private BluetoothAdapter bluetoothAdapter = null;
     public static BluetoothService btService = null;
@@ -115,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             }
         });
     }
-
 
     @Override
     public void onStart() {
@@ -223,10 +231,10 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     connectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
-                        Toast.makeText(MainActivity.this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Connected to " + connectedDeviceName, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.MESSAGE_TOAST:
-                        Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, msg.getData().getString(Constants.TOAST), Toast.LENGTH_SHORT).show();
                     break;
             }
         }
@@ -239,34 +247,10 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
         if(menu instanceof MenuBuilder){
             MenuBuilder m = (MenuBuilder) menu;
-            m.setOptionalIconsVisible(true);
+            //m.setOptionalIconsVisible(true);
         }
 
         return true;
-    }
-
-    public void toolsActionButton_Click(View view) {
-        if(sidePanelLinearLayout.getVisibility() == View.VISIBLE) {
-            isToolsActionButtonClicked = false;
-            sidePanelLinearLayout.setVisibility(View.GONE);
-            upPanelLinearLayout.setVisibility(View.GONE);
-            strokeWidthLinearLayout.setVisibility(View.GONE);
-        }
-        else{
-            isToolsActionButtonClicked = true;
-            sidePanelLinearLayout.setVisibility(View.VISIBLE);
-            upPanelLinearLayout.setVisibility(View.VISIBLE);
-            if(isStrokeWidthButtonClicked)
-                strokeWidthLinearLayout.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void undoActionButton_Click(View view){
-        drawingView.Undo();
-    }
-
-    public void createPolygonActionButton_Click(View view){
-        drawingView.CreatePolygon();
     }
 
     public void confirmSavingActionButton_Click(View view){
@@ -280,12 +264,12 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 SaveSvgFile(fileName);
                 saveFileLinearLayout.setVisibility(View.GONE);
                 drawingView.setEnabled(true);
-                if(isToolsActionButtonClicked){
-                    sidePanelLinearLayout.setVisibility(View.VISIBLE);
+                /*if(isToolsActionButtonClicked){
+                    // sidePanelLinearLayout.setVisibility(View.VISIBLE);
                     upPanelLinearLayout.setVisibility(View.VISIBLE);
                     if(isStrokeWidthButtonClicked)
                         strokeWidthLinearLayout.setVisibility(View.VISIBLE);
-                }
+                }*/
             }
         }
         else{
@@ -293,13 +277,27 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         }
     }
 
+    //region toolsActionButtons
+    public void toolsActionButton_Click(View view) {
+        if (menuDrawingItems.getVisibility() == View.VISIBLE) {
+            menuDrawingItems.setVisibility(View.GONE);
+        }
+        else {
+            menuDrawingItems.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void createPolygonActionButton_Click(View view){
+        drawingView.CreatePolygon();
+    }
+
     public void cancelSavingActionButton_Click(View view){
         selectedDirectory = "";
         saveFileLinearLayout.setVisibility(View.GONE);
         drawingView.setEnabled(true);
-        if(isToolsActionButtonClicked){
-            sidePanelLinearLayout.setVisibility(View.VISIBLE);
-            upPanelLinearLayout.setVisibility(View.VISIBLE);
+        if(isSettingsActionButtonClicked){
+            //   sidePanelLinearLayout.setVisibility(View.VISIBLE);
+            //upPanelLinearLayout.setVisibility(View.VISIBLE);
             if(isStrokeWidthButtonClicked)
                 strokeWidthLinearLayout.setVisibility(View.VISIBLE);
         }
@@ -307,41 +305,71 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     public void drawPathButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
-        SetButtonsBackground(drawPathButton);
+        //SetButtonsBackground(drawPathButton);
+        SetClickedButtonsBackground(buttonPencil);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.PATH);
         toolsActionButton.setImageResource(R.drawable.custom_path);
         createPolygonActionButton.setVisibility(View.INVISIBLE);
+        menuDrawingItems.setVisibility(View.INVISIBLE);
     }
 
     public void drawLineButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
-        SetButtonsBackground(drawLineButton);
+        //SetButtonsBackground(drawLineButton);
+        SetClickedButtonsBackground(buttonLine);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.LINE);
         toolsActionButton.setImageResource(R.drawable.custom_diagonal_line);
         createPolygonActionButton.setVisibility(View.INVISIBLE);
+        menuDrawingItems.setVisibility(View.INVISIBLE);
     }
 
     public void drawRectangleButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
-        SetButtonsBackground(drawRectangleButton);
+        //SetButtonsBackground(drawRectangleButton);
+        SetClickedButtonsBackground(buttonShape);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.RECTAGLE);
         toolsActionButton.setImageResource(R.drawable.custom_rectangle);
         createPolygonActionButton.setVisibility(View.INVISIBLE);
+        menuDrawingItems.setVisibility(View.INVISIBLE);
     }
 
     public void drawCircleButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
-        SetButtonsBackground(drawCircleButton);
+        //SetButtonsBackground(drawCircleButton);
+        SetClickedButtonsBackground(buttonCircle);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.CIRCLE);
         toolsActionButton.setImageResource(R.drawable.custom_circle);
         createPolygonActionButton.setVisibility(View.INVISIBLE);
+        menuDrawingItems.setVisibility(View.INVISIBLE);
     }
 
     public void drawPolygonButton_Click(View view) {
-        SetButtonsBackground(drawPolygonButton);
+        //SetButtonsBackground(drawPolygonButton);
+        SetClickedButtonsBackground(buttonPolygon);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.POLYGON);
         toolsActionButton.setImageResource(R.drawable.custom_polygon);
         createPolygonActionButton.setVisibility(View.VISIBLE);
+        menuDrawingItems.setVisibility(View.INVISIBLE);
+    }
+    //endregion
+
+    //region settingsActionButtons
+    public void settingsActionButtons_Click(View view) {
+        if (menuSettingsItems.getVisibility() == View.VISIBLE) {
+            menuSettingsItems.setVisibility(View.GONE);
+        }
+        else {
+            menuSettingsItems.setVisibility(View.VISIBLE);
+        }
+    }
+
+
+    public void undoActionButton_Click(View view){
+        drawingView.Undo();
+    }
+
+    public void redoActionButton_Click(View view){
+        drawingView.Redo(); //todo: dokoncit funkciu
     }
 
     public void strokeColorButton_Click(View view) {
@@ -366,18 +394,18 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 .setColor(color)
                 .setShowAlphaSlider(true)
                 .show(this);
-        fillColorButton.setBackgroundColor(color);
+        buttonFill.setBackgroundColor(color);
     }
 
     public void strokeWidthButton_Click(View view) {
         if(strokeWidthLinearLayout.getVisibility() == View.GONE){
             strokeWidthLinearLayout.setVisibility(View.VISIBLE);
-            strokeWidthButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonClicked));
+            buttonWidth.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonClicked));
             isStrokeWidthButtonClicked = true;
         }
         else{
             strokeWidthLinearLayout.setVisibility(View.GONE);
-            strokeWidthButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonNotClicked));
+            buttonWidth.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonNotClicked));
             isStrokeWidthButtonClicked = false;
         }
     }
@@ -385,6 +413,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void strokeWidth1Button_Click(View view){
         SetStrokeWidthButtonsBackground(strokeWidth1Button);
         SettingsHolder.getInstance().getSettings().setStrokeWidth(1.0f);
+        //colorActionButton
     }
     public void strokeWidth2Button_Click(View view){
         SetStrokeWidthButtonsBackground(strokeWidth2Button);
@@ -402,6 +431,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         SetStrokeWidthButtonsBackground(strokeWidth5Button);
         SettingsHolder.getInstance().getSettings().setStrokeWidth(9.0f);
     }
+    //endregion
 
     private void InitializeSettings() {
         rootDirectory = this.getFilesDir() + "//SvgFiles//";
@@ -418,21 +448,15 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         errorMessageTextView = (TextView)findViewById(R.id.errorMessageTextView);
 
         //Layouts
-        sidePanelLinearLayout = (LinearLayout) findViewById(R.id.sidePanelLinearLayout);
-        upPanelLinearLayout = (LinearLayout) findViewById(R.id.upPanelLinearLayout);
-        strokeWidthLinearLayout = (LinearLayout) findViewById(R.id.strokeWidthLinearLayout);
         saveFileLinearLayout = (LinearLayout) findViewById(R.id.saveFileLinearLayout);
-        canvasLayout = (RelativeLayout) findViewById(R.id.canvasLayout);
+        //sidePanelLinearLayout = (LinearLayout) findViewById(R.id.sidePanelLinearLayout);
+        //upPanelLinearLayout = (LinearLayout) findViewById(R.id.upPanelLinearLayout);
+        menuDrawingItems = (LinearLayout) findViewById(R.id.menuDrawingItems);
+        menuSettingsItems = (LinearLayout) findViewById(R.id.menuSettingsItems);
+        strokeWidthLinearLayout = (LinearLayout) findViewById(R.id.strokeWidthLinearLayout);
+        //canvasLayout = (RelativeLayout) findViewById(R.id.canvasLayout);
 
         //Image buttons
-        drawLineButton = (ImageButton)findViewById(R.id.drawLineButton);
-        drawRectangleButton = (ImageButton)findViewById(R.id.drawRectangleButton);
-        drawCircleButton = (ImageButton)findViewById(R.id.drawCircleButton);
-        drawPathButton = (ImageButton)findViewById(R.id.drawPathButton);
-        drawPolygonButton= (ImageButton)findViewById(R.id.drawPolygonButton);
-        strokeColorButton= (ImageButton)findViewById(R.id.strokeColorButton);
-        strokeWidthButton= (ImageButton)findViewById(R.id.strokeWidthButton);
-        fillColorButton= (ImageButton)findViewById(R.id.fillColorButton);
         strokeWidth1Button= (ImageButton)findViewById(R.id.strokeWidth1Button);
         strokeWidth2Button= (ImageButton)findViewById(R.id.strokeWidth2Button);
         strokeWidth3Button= (ImageButton)findViewById(R.id.strokeWidth3Button);
@@ -441,19 +465,31 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
         //Action buttons
         toolsActionButton = (FloatingActionButton) findViewById(R.id.toolsActionButton);
+        buttonPencil = (FloatingActionButton) findViewById(R.id.buttonPencil);
+        buttonLine = (FloatingActionButton) findViewById(R.id.buttonLine);
+        buttonShape = (FloatingActionButton) findViewById(R.id.buttonShape);
+        buttonCircle = (FloatingActionButton) findViewById(R.id.buttonCircle);
+        buttonPolygon = (FloatingActionButton) findViewById(R.id.buttonPolygon);
         createPolygonActionButton = (FloatingActionButton) findViewById(R.id.createPolygonActionButton);
-        undoActionButton = (FloatingActionButton) findViewById(R.id.undoActionButton);
-        confirmSavingActionButton = (FloatingActionButton) findViewById(R.id.confirmSavingActionButton);
-        cancelSavingActionButton = (FloatingActionButton) findViewById(R.id.cancelSavingActionButton);
+
+        settingActionButton = (FloatingActionButton) findViewById(R.id.settingsActionButtons);
+        buttonFill = (FloatingActionButton) findViewById(R.id.buttonFill);
+        buttonColor = (FloatingActionButton) findViewById(R.id.buttonColor);
+        buttonWidth = (FloatingActionButton) findViewById(R.id.buttonWidth);
+        buttonRedo = (FloatingActionButton) findViewById(R.id.buttonRedo);
+        buttonUndo = (FloatingActionButton) findViewById(R.id.buttonUndo);
+
+        //confirmSavingActionButton = (FloatingActionButton) findViewById(R.id.confirmSavingActionButton);
+        //cancelSavingActionButton = (FloatingActionButton) findViewById(R.id.cancelSavingActionButton);
 
         createPolygonActionButton.setVisibility(View.INVISIBLE);
         strokeWidthLinearLayout.setVisibility(View.GONE);
         saveFileLinearLayout.setVisibility(View.GONE);
-        strokeColorButton.setBackgroundColor(Color.parseColor(SettingsHolder.getInstance().getSettings().getStrokeWithOpacity()));
-        fillColorButton.setBackgroundColor(Color.parseColor(SettingsHolder.getInstance().getSettings().getFillWithOpacity()));
+        buttonColor.setBackgroundColor(Color.parseColor(SettingsHolder.getInstance().getSettings().getStrokeWithOpacity()));
+        buttonFill.setBackgroundColor(Color.parseColor(SettingsHolder.getInstance().getSettings().getFillWithOpacity()));
     }
 
-    private void SetButtonsBackground(ImageButton button) {
+    /*private void SetButtonsBackground(ImageButton button) {
         //drawCircleButton.setBackgroundColor(getResources().getColor(R.color.colorDrawButtonNotClicked)); -> deprecated
         drawLineButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonNotClicked));
         drawRectangleButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonNotClicked));
@@ -462,7 +498,19 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         drawPolygonButton.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonNotClicked));
 
         button.setBackgroundColor(ContextCompat.getColor(this, R.color.colorDrawButtonClicked));
+    }*/
+
+    private void SetClickedButtonsBackground(FloatingActionButton button) {
+        buttonPencil.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorDrawButtonNotClicked));
+        buttonLine.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorDrawButtonNotClicked));
+        buttonShape.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorDrawButtonNotClicked));
+        buttonCircle.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorDrawButtonNotClicked));
+        buttonPolygon.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorDrawButtonNotClicked));
+
+        button.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorActionButton));
     }
+
+
 
     private void SetStrokeWidthButtonsBackground(ImageButton button) {
         strokeWidth1Button.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.colorDrawButtonNotClicked));
@@ -490,13 +538,13 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 SettingsHolder.getInstance().getSettings().setStrokeWithOpacity(hexColorWithOpacity);
                 SettingsHolder.getInstance().getSettings().setStroke(hexColor);
                 SettingsHolder.getInstance().getSettings().setStrokeOpacity(opacity);
-                strokeColorButton.setBackgroundColor(color);
+                buttonColor.setBackgroundColor(color);
                 break;
             case FILL_DIALOG_ID:
                 SettingsHolder.getInstance().getSettings().setFillWithOpacity(hexColorWithOpacity);
                 SettingsHolder.getInstance().getSettings().setFill(hexColor);
                 SettingsHolder.getInstance().getSettings().setFillOpacity(opacity);
-                fillColorButton.setBackgroundColor(color);
+                buttonFill.setBackgroundColor(color);
                 break;
         }
     }
@@ -510,6 +558,9 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case R.id.new_svg:
+                NewSvgFile();
+                return true;
             case R.id.save_svg:
                 SaveSvgFile();
                 return true;
@@ -526,15 +577,26 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         }
     }
 
+    private void NewSvgFile(){
+        try {
+            drawingView.Restart();
+            drawingView.invalidate();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void SaveSvgFile(){
         File mPath = new File(rootDirectory);
         FileDialog fileDialog = new FileDialog(this, mPath, ".sss");
         fileDialog.setSelectDirectoryOption(true);
         fileDialog.addDirectoryListener(new FileDialog.DirectorySelectedListener() {
             public void directorySelected(File directory) {
-                if(isToolsActionButtonClicked){
-                    sidePanelLinearLayout.setVisibility(View.GONE);
-                    upPanelLinearLayout.setVisibility(View.GONE);
+                if(isSettingsActionButtonClicked){
+                    //sidePanelLinearLayout.setVisibility(View.GONE);
+                    //todo: this rework
+                    //upPanelLinearLayout.setVisibility(View.GONE);
                 }
                 if(isStrokeWidthButtonClicked)
                     strokeWidthLinearLayout.setVisibility(View.GONE);
@@ -638,18 +700,18 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     private void TurnOnIWantToStareMode(){
-        sidePanelLinearLayout.setVisibility(View.GONE);
-        upPanelLinearLayout.setVisibility(View.GONE);
-        undoActionButton.setVisibility(View.GONE);
+        // sidePanelLinearLayout.setVisibility(View.GONE);
+        //upPanelLinearLayout.setVisibility(View.GONE);
+        //buttonUndo.setVisibility(View.GONE);
         if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
             createPolygonActionButton.setVisibility(View.GONE);
         toolsActionButton.setVisibility(View.GONE);
     }
 
     private void TurnOnIWantToDrawMode(){
-        sidePanelLinearLayout.setVisibility(View.VISIBLE);
-        upPanelLinearLayout.setVisibility(View.VISIBLE);
-        undoActionButton.setVisibility(View.VISIBLE);
+        // sidePanelLinearLayout.setVisibility(View.VISIBLE);
+        //upPanelLinearLayout.setVisibility(View.VISIBLE);
+        //buttonUndo.setVisibility(View.VISIBLE);
         if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
             createPolygonActionButton.setVisibility(View.VISIBLE);
         toolsActionButton.setVisibility(View.VISIBLE);
@@ -697,19 +759,24 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
         switch(SettingsHolder.getInstance().getSettings().getShape()){
             case PATH:
-                SetButtonsBackground(drawPathButton);
+                SetClickedButtonsBackground(buttonPencil);
+                //SetButtonsBackground(drawPathButton);
                 break;
             case LINE:
-                SetButtonsBackground(drawLineButton);
+                //SetButtonsBackground(drawLineButton);
+                SetClickedButtonsBackground(buttonLine);
                 break;
             case RECTAGLE:
-                SetButtonsBackground(drawRectangleButton);
+                //SetButtonsBackground(drawRectangleButton);
+                SetClickedButtonsBackground(buttonShape);
                 break;
             case CIRCLE:
-                SetButtonsBackground(drawCircleButton);
+                //SetButtonsBackground(drawCircleButton);
+                SetClickedButtonsBackground(buttonCircle);
                 break;
             case POLYGON:
-                SetButtonsBackground(drawPolygonButton);
+                //SetButtonsBackground(drawPolygonButton);
+                SetClickedButtonsBackground(buttonPolygon);
                 createPolygonActionButton.setVisibility(View.VISIBLE);
                 break;
         }
