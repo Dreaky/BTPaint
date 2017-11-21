@@ -217,7 +217,9 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                             receivedXmlElement += readMessage;
                             if(receivedXmlElement.equals(Constants.UNDO))
                                 drawingView.Undo();
-                            else{
+                            else if(receivedXmlElement.equals(Constants.REDO))
+                                drawingView.Redo();
+                            else {
                                 drawingView.AddSvgElement(receivedXmlElement);
                                 drawingView.invalidate();
                             }

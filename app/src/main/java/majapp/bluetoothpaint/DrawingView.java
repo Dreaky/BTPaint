@@ -30,7 +30,9 @@ public class DrawingView extends View
     private float endY;
     private String points;
     private List<String> svgElements;
+    private List<String> deletedSvgElements;
     private List<PointF> polygonPoints;
+    private List<PointF> deletedPolygonPoints;
     private Paint drawPaint;
     private int paintColor;
     private BluetoothService btService = null;
@@ -54,8 +56,10 @@ public class DrawingView extends View
         //https://stackoverflow.com/questions/10384613/android-canvas-drawpicture-not-working-in-devices-with-ice-cream-sandwich
         if(android.os.Build.VERSION.SDK_INT <= 22)
             this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        svgElements = new ArrayList<String>();
-        polygonPoints = new ArrayList<PointF>();
+        svgElements = new ArrayList<>();
+        deletedSvgElements = new ArrayList<>();
+        polygonPoints = new ArrayList<>();
+        deletedPolygonPoints = new ArrayList<>();
         drawPaint = new Paint();
         paintColor = 0xFF000000;
         drawPaint.setAntiAlias(true);
@@ -281,11 +285,13 @@ public class DrawingView extends View
 
     public void Undo(){
         if(polygonPoints.size() > 0) {
+            deletedPolygonPoints.add(polygonPoints.get(polygonPoints.size() - 1));
             polygonPoints.remove(polygonPoints.size() - 1);
         }
         else{
             int lastItemIndex = svgElements.size() - 1;
             if(lastItemIndex >= 0) {
+                deletedSvgElements.add(svgElements.get(lastItemIndex));
                 svgElements.remove(lastItemIndex);
                 svgElement = "";
             }
@@ -300,18 +306,20 @@ public class DrawingView extends View
 
     public void Redo(){
         if(polygonPoints.size() > 0) {
-            polygonPoints.remove(polygonPoints.size() - 1);
+            polygonPoints.add(deletedPolygonPoints.get(deletedPolygonPoints.size() - 1));
+            deletedPolygonPoints.remove(deletedPolygonPoints.size() - 1);
         }
         else{
-            int lastItemIndex = svgElements.size() - 1;
+            int lastItemIndex = deletedSvgElements.size() - 1;
             if(lastItemIndex >= 0) {
-                svgElements.remove(lastItemIndex);
+                svgElements.add(deletedSvgElements.get(lastItemIndex));
+                deletedSvgElements.remove(lastItemIndex);
                 svgElement = "";
             }
         }
 
         if(CanSendData()){
-            btService.write(Constants.UNDO.getBytes());
+            btService.write(Constants.REDO.getBytes());
         }
 
         invalidate();

@@ -88,7 +88,7 @@
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="redoActionButton_Click"
-                android:src="@drawable/custom_path"
+                android:src="@drawable/ic_redo_black_24dp"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
                 app:borderWidth="3dp" />
 
@@ -100,7 +100,7 @@
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="undoActionButton_Click"
-                android:src="@drawable/custom_undo"
+                android:src="@drawable/ic_undo_black_24dp"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
                 app:borderWidth="3dp" />
 
