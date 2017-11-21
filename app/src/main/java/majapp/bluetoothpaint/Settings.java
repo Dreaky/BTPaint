@@ -22,10 +22,10 @@ public class Settings {
     public Settings() {
         // Paint
         strokeWidth = 1.0f;
-        stroke = "#FF0000";
-        fill = "#00FF00";
-        strokeWithOpacity = "#FFFF0000";
-        fillWithOpacity = "#FF00FF00";
+        stroke = "#000000";
+        fill = "#FFFFFF";
+        strokeWithOpacity = "#FF000000";
+        fillWithOpacity = "#FFFFFFFF";
         shape = ShapesEnum.PATH;
         strokeOpacity = 1.0f;
         fillOpacity= 1.0f;
