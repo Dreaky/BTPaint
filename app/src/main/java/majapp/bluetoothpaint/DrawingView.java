@@ -5,9 +5,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.larvalabs.svgandroid.SVG;
@@ -37,19 +39,36 @@ public class DrawingView extends View
     private int paintColor;
     private BluetoothService btService = null;
 
+    //zoom and move canvas variables
+    private ScaleGestureDetector scaleGestureDetector;
+    private float scaleFactor = 1.f;
+    private float scalePivotX = 0;
+    private float scalePivotY = 0;
+    private float canvasClipX = 0;      // left position of view
+    private float canvasClipY = 0;      // top position of view
+    private float canvasOffsetX = 0;
+    private float canvasOffsetY = 0;
+    private boolean isScaling = false;
+    private final float MIN_ZOOM = 0.3f;
+    private final float MAX_ZOOM = 5f;
+
 
     private String svgHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?><!-- Generator: Adobe Illustrator 13.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 14948)  --><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\t width=\"0px\" height=\"0px\" viewBox=\"0 0 0 0\" enable-background=\"new 0 0 0 0\" xml:space=\"preserve\"><g id=\"android\">";
     private String svgElement = "";
     private String svgFoot = "\n</g></svg>";
 
+
+
     public DrawingView(Context context, AttributeSet attrs){
         super(context, attrs);
         setupDrawing();
+        scaleGestureDetector = new ScaleGestureDetector(context, new MyOnScaleGestureListener());  // MM
     }
 
     public DrawingView(Context context, AttributeSet attrs, int defStyle)
     {
         super(context, attrs, defStyle);
+        scaleGestureDetector = new ScaleGestureDetector(context, new MyOnScaleGestureListener()); // MM
     }
 
     private void setupDrawing(){
@@ -100,9 +119,18 @@ public class DrawingView extends View
             Picture picture = svg.getPicture();
             // Draw picture in canvas
             // Note: use transforms such as translate, scale and rotate to position the picture correctly
+            canvas.save();
+            canvas.translate(-canvasOffsetX,-canvasOffsetY);
+            canvas.scale(scaleFactor, scaleFactor, scalePivotX, scalePivotY);
             canvas.drawPicture(picture);
 
+            Rect rect;
+            rect = canvas.getClipBounds();  // get displayed canvas rect
+            canvasClipX = rect.left;
+            canvasClipY = rect.top;
+
             DrawPolygonPoints(canvas);
+            canvas.restore();
         }
         catch(Exception ex) {
             Log.e("CHYBA", "svgString :-> " + svgHeader + svgBody + svgElement + svgFoot);
@@ -119,20 +147,32 @@ public class DrawingView extends View
             return true;
 
         if(SettingsHolder.getInstance().getSettings().getShape() != ShapesEnum.POLYGON) {
+            scaleGestureDetector.onTouchEvent(event);
+
+            if(event.getPointerCount()>1)
+                isScaling=true;
+
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    startX = event.getX();
-                    startY = event.getY();
-                    points = "M" + startX + "," + startY;
+                    startX = canvasClipX + event.getX() / scaleFactor;
+                    startY = canvasClipY + event.getY() / scaleFactor;
+
+                    if(!isScaling)
+                        points = "M" + startX + "," + startY;
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    endX = event.getX();
-                    endY = event.getY();
+                    endX = canvasClipX + event.getX() / scaleFactor;
+                    endY = canvasClipY + event.getY() / scaleFactor;
                     points += "L" + endX + "," + endY;
-                    UpdateSvgBody();
+
+                    if(!isScaling)
+                        UpdateSvgBody();
                     break;
                 case MotionEvent.ACTION_UP:
-                    AddSvgElement();
+                    if (isScaling)
+                        isScaling=false;
+                    else
+                        AddSvgElement();
                     break;
                 default:
                     return false;
@@ -142,8 +182,8 @@ public class DrawingView extends View
         else{
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    startX = event.getX();
-                    startY = event.getY();
+                    startX = canvasClipX + event.getX()/scaleFactor;
+                    startY = canvasClipY + event.getY()/scaleFactor;
                     break;
                 case MotionEvent.ACTION_UP:
                     polygonPoints.add(new PointF(startX, startY));
@@ -158,6 +198,40 @@ public class DrawingView extends View
         return true;
     }
 
+    public class MyOnScaleGestureListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            isScaling=true;
+            scaleFactor *= detector.getScaleFactor();
+            scaleFactor = Math.max(MIN_ZOOM, Math.min(scaleFactor, MAX_ZOOM));    // set zoom range
+
+            // move canvas on moving fingers from/to first saved point
+            float actualScalePivotX = canvasClipX + detector.getFocusX()/scaleFactor;;
+            float actualScalePivotY = canvasClipY + detector.getFocusY()/scaleFactor;;
+            float fs = (scaleFactor>=1) ? 1f : 1/3f;
+
+            canvasOffsetX += (scalePivotX - actualScalePivotX)*fs;
+            canvasOffsetY += (scalePivotY - actualScalePivotY)*fs;
+
+            return true;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector)
+        {
+            // on scaling start save first point
+            scalePivotX = canvasClipX + detector.getFocusX()/scaleFactor;
+            scalePivotY = canvasClipY + detector.getFocusY()/scaleFactor;
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            svgElement = "";
+        }
+    }
+
     private void UpdateSvgBody() {
         switch(SettingsHolder.getInstance().getSettings().getShape()) {
             case LINE:
@@ -166,7 +240,7 @@ public class DrawingView extends View
             case CIRCLE:
                 CreateCircle();
                 break;
-            case RECTAGLE:
+            case RECTANGLE:
                 CreateRectangle();
                 break;
             case PATH:
@@ -335,6 +409,13 @@ public class DrawingView extends View
     }
 
     public void Restart(){
+        scaleFactor = 1.f;
+        scalePivotX = 0;
+        scalePivotY = 0;
+        canvasClipX = 0;
+        canvasClipY = 0;
+        canvasOffsetX = 0;
+        canvasOffsetY = 0;
         svgElements.clear();
         svgElement = "";
     }
@@ -401,8 +482,8 @@ public class DrawingView extends View
     private boolean CanSendData(){
         return
                 (btService != null) &&
-                SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
-                SettingsHolder.getInstance().getSettings().getSendData();
+                        SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
+                        SettingsHolder.getInstance().getSettings().getSendData();
     }
 
     private void AddSvgElement(){

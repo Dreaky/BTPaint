@@ -9,13 +9,6 @@
         android:visible="true">
     </item>
     <item
-        android:id="@+id/save_svg"
-        android:title="@string/save_file"
-        app:showAsAction="never"
-        android:icon="@drawable/custom_save_icon"
-        android:visible="true">
-    </item>
-    <item
         android:id="@+id/open_svg"
         android:title="@string/open_file"
         app:showAsAction="never"
@@ -23,10 +16,24 @@
         android:visible="true">
     </item>
     <item
+        android:id="@+id/save_svg"
+        android:title="@string/save_file"
+        app:showAsAction="never"
+        android:icon="@drawable/custom_save_icon"
+        android:visible="true">
+    </item>
+    <item
         android:id="@+id/open_bt_settings"
         android:title="@string/bluetooth"
         app:showAsAction="never"
         android:icon="@drawable/custom_bluetooth"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/exit"
+        android:title="@string/exit"
+        app:showAsAction="never"
+        android:icon="@drawable/ic_exit_black_24dp"
         android:visible="true">
     </item>
 </menu>

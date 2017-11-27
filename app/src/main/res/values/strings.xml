@@ -1,25 +1,37 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Svg paint</string>
-    <string name="filename_error_message">Cannot save! File name contains some unsupported characters!</string>
+
+    <string name="app_name">BT paint</string>
+    <string name="bluetooth">Shared screen</string>
+    <string name="bt_newDevices">New devices</string>
+    <string name="bt_noNewDevices">No new devices found</string>
+    <string name="bt_noPairedDevices">No paired devices found</string>
+    <string name="bt_notSupported">Your device does not support Bluetooth.</string>
+    <string name="bt_pairedDevices">Paired devices</string>
+    <string name="bt_scan">Scan</string>
+    <string name="bt_wannaDraw">I want to draw</string>
+    <string name="bt_wannaStare">I want to watch</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_createNew">Create new</string>
+    <string name="btn_exit">Exit</string>
+    <string name="btn_open">Open</string>
+    <string name="btn_save">Save</string>
     <string name="empty_filename">Cannot save! File name must had at least one character!</string>
-    <string name="new_file">New</string>
-    <string name="save_file">Save</string>
-    <string name="open_file">Open</string>
     <string name="error">Error!</string>
+    <string name="exit">Exit</string>
+    <string name="filename_error_message">Cannot save! File name contains unsupported characters!</string>
     <string name="hint">MonaLisa</string>
-    <string name="unsupported_file_format">Formát súboru nemá podporu!</string>
-    <string name="saving_successful">Súbor bol úspešne uložený</string>
-    <string name="saving_failed">Súbor sa nepodarilo uložiť!</string>
-    <string name="bluetooth">Režim zdieľanej obrazovky</string>
-    <string name="bt_scan">Skenovať</string>
-    <string name="bt_wannaDraw">Chcem kresliť</string>
-    <string name="bt_wannaStare">Chcem sa kochať</string>
-    <string name="bt_notSupported">Vaše zariadenie nepodporuje Bluetooth.</string>
-    <string name="bt_pairedDevices">Spárované zariadenia</string>
-    <string name="bt_newDevices">Novné zariadenia</string>
-    <string name="bt_noPairedDevices">Nenašli sa žiadne spárované zariadenia</string>
-    <string name="bt_noNewDevices">Nenašli sa žiadne nové zariadenia</string>
-    <string name="title_connecting">Pripájam sa...</string>
-    <string name="title_connected_to">Pripojené ku <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="title_not_connected">Nepripojené</string>
+    <string name="lbl_fileName">Enter the filename:</string>
+    <string name="lbl_saveOrDiscard">Your changes will be lost if you don’t save them.</string>
+    <string name="new_file">New</string>
+    <string name="open_file">Open</string>
+    <string name="save_file">Save</string>
+    <string name="saving_failed">Unable to save file!</string>
+    <string name="saving_successful">File successfully saved</string>
+    <string name="title_connected_to">Connected to <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="title_connecting">Connecting…</string>
+    <string name="title_not_connected">Not connected</string>
+    <string name="title_opening">Select…</string>
+    <string name="title_saving">Saving…</string>
+    <string name="unsupported_file_format">File format has no support!</string>
+
 </resources>

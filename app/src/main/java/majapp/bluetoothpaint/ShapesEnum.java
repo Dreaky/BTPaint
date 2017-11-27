@@ -3,7 +3,7 @@ package majapp.bluetoothpaint;
 public enum ShapesEnum {
     LINE,
     CIRCLE,
-    RECTAGLE,
+    RECTANGLE,
     PATH,
     POLYGON,
 }

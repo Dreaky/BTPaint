@@ -1,25 +1,37 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">Svg kreslič</string>
-    <string name="filename_error_message">Názov súboru obsahuje nepovolené znaky!</string>
-    <string name="empty_filename">Názov súboru musí obsahovať aspoň 1 znak!</string>
-    <string name="new_file">Nový obrázok</string>
-    <string name="save_file">Uložiť</string>
-    <string name="open_file">Otvoriť</string>
-    <string name="error">Chyba!</string>
-    <string name="hint">MonaLisa</string>
-    <string name="unsupported_file_format">Formát súboru nemá podporu!</string>
-    <string name="saving_successful">Súbor bol úspešne uložený</string>
-    <string name="saving_failed">Súbor sa nepodarilo uložiť!</string>
+
+    <string name="app_name">BT plátno</string>
     <string name="bluetooth">Režim zdieľanej obrazovky</string>
-    <string name="bt_scan">Skenovať</string>
-    <string name="bt_wannaDraw">Chcem kresliť</string>
-    <string name="bt_wannaStare">Chcem sa kochať</string>
+    <string name="bt_newDevices">Dostupné zariadenia</string>
+    <string name="bt_noNewDevices">Nenašli sa žiadne nové zariadenia</string>
+    <string name="bt_noPairedDevices">Nenašli sa žiadne spárované zariadenia</string>
     <string name="bt_notSupported">Vaše zariadenie nepodporuje Bluetooth.</string>
     <string name="bt_pairedDevices">Spárované zariadenia</string>
-    <string name="bt_newDevices">Novné zariadenia</string>
-    <string name="bt_noPairedDevices">Nenašli sa žiadne spárované zariadenia</string>
-    <string name="bt_noNewDevices">Nenašli sa žiadne nové zariadenia</string>
-    <string name="title_connecting">Pripájam sa...</string>
+    <string name="bt_scan">Skenovať</string>
+    <string name="bt_wannaDraw">Chcem kresliť</string>
+    <string name="bt_wannaStare">Chcem sa dívať</string>
+    <string name="btn_cancel">Zrušiť</string>
+    <string name="btn_createNew">Vytvor nový</string>
+    <string name="btn_exit">Zavrieť</string>
+    <string name="btn_open">Otvoriť</string>
+    <string name="btn_save">Uložiť</string>
+    <string name="empty_filename">Názov súboru musí obsahovať aspoň 1 znak!</string>
+    <string name="error">Chyba!</string>
+    <string name="exit">Ukončiť</string>
+    <string name="filename_error_message">Názov súboru obsahuje nepovolené znaky!</string>
+    <string name="hint">MonaLisa</string>
+    <string name="lbl_fileName">Zadajte názov súboru:</string>
+    <string name="lbl_saveOrDiscard">Vykonené zmeny budú zmazané, ak si ich neuložíte.</string>
+    <string name="new_file">Nový obrázok</string>
+    <string name="open_file">Otvoriť</string>
+    <string name="save_file">Uložiť</string>
+    <string name="saving_failed">Súbor sa nepodarilo uložiť!</string>
+    <string name="saving_successful">Súbor bol úspešne uložený</string>
     <string name="title_connected_to">Pripojené ku <xliff:g id="device_name">%1$s</xliff:g></string>
+    <string name="title_connecting">Pripájam sa…</string>
     <string name="title_not_connected">Nepripojené</string>
+    <string name="title_opening">Výber…</string>
+    <string name="title_saving">Ukladanie…</string>
+    <string name="unsupported_file_format">Formát súboru nemá podporu!</string>
+
 </resources>

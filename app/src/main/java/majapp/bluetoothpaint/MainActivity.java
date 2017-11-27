@@ -1,8 +1,10 @@
 package majapp.bluetoothpaint;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -13,13 +15,13 @@ import android.support.annotation.DrawableRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.menu.MenuBuilder;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,6 +41,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements ColorPickerDialogListener {
@@ -46,11 +50,12 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private static final int STROKE_DIALOG_ID = 0;
     private static final int FILL_DIALOG_ID = 1;
     private static final float factor = 1/255.0f;
-    private EditText fileNameEditText;
+    final Context context = this;
+
+    EditText fileNameEditText;
     private TextView errorMessageTextView;
     private DrawingView drawingView;
 
-    private LinearLayout saveFileLinearLayout;
     private LinearLayout menuDrawingItems;
     private LinearLayout menuSettingsItems;
     private LinearLayout strokeWidthLinearLayout;
@@ -80,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     private boolean isFillableElement = false;
     private boolean isStrokeWidthButtonClicked = false;
+    private List<String> savedElementInstance = null;
 
     private String rootDirectory;
     private String selectedDirectory = "";
@@ -98,28 +104,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         InitializeSettings();
         InitializeViews();
         InitializeUserSettings();
-
-        fileNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(IsAlphanumeric(s.toString())){
-                    errorMessageTextView.setText("");
-                }
-                else{
-                    errorMessageTextView.setText(R.string.filename_error_message);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
     }
 
     @Override
@@ -183,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         }
         actionBar.setSubtitle(subTitle);
     }
-
+    // region BT handler
     private String receivedXmlElement = "";
     private final Handler mHandler = new Handler() {
         @Override
@@ -238,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             }
         }
     };
+    // endregion
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -250,24 +235,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         }
 
         return true;
-    }
-
-    public void confirmSavingActionButton_Click(View view){
-        String fileName = fileNameEditText.getText().toString();
-
-        if(IsAlphanumeric(fileName)){
-            if(fileName.length() <= 0){
-                errorMessageTextView.setText(R.string.empty_filename);
-            }
-            else{
-                SaveSvgFile(fileName);
-                saveFileLinearLayout.setVisibility(View.GONE);
-                drawingView.setEnabled(true);
-            }
-        }
-        else{
-            errorMessageTextView.setText(R.string.filename_error_message);
-        }
     }
 
     //region toolsActionButtons
@@ -284,14 +251,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         drawingView.CreatePolygon();
     }
 
-    public void cancelSavingActionButton_Click(View view){
-        selectedDirectory = "";
-        saveFileLinearLayout.setVisibility(View.GONE);
-        drawingView.setEnabled(true);
-        if(isStrokeWidthButtonClicked)
-            strokeWidthLinearLayout.setVisibility(View.VISIBLE);
-    }
-
     public void drawPathButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
         isFillableElement = false;
@@ -303,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             buttonFill.setVisibility(View.INVISIBLE);
         }
+
     }
 
     public void drawLineButton_Click(View view) {
@@ -322,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         drawingView.ClearPolygonPointsList();
         isFillableElement = true;
         SetClickedButtonsBackground(buttonShape);
-        SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.RECTAGLE);
+        SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.RECTANGLE);
         toolsActionButton.setImageResource(R.drawable.custom_rectangle);
         createPolygonActionButton.setVisibility(View.GONE);
         menuDrawingItems.setVisibility(View.GONE);
@@ -460,11 +420,9 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private void InitializeViews()
     {
         drawingView = (DrawingView)findViewById(R.id.drawingView);
-        fileNameEditText = (EditText)findViewById(R.id.fileNameEditText);
-        errorMessageTextView = (TextView)findViewById(R.id.errorMessageTextView);
 
         //Layouts
-        saveFileLinearLayout = (LinearLayout) findViewById(R.id.saveFileLinearLayout);
+        //saveFileLinearLayout = (LinearLayout) findViewById(R.id.saveFileLinearLayout);
         menuDrawingItems = (LinearLayout) findViewById(R.id.menuDrawingItems);
         menuSettingsItems = (LinearLayout) findViewById(R.id.menuSettingsItems);
         strokeWidthLinearLayout = (LinearLayout) findViewById(R.id.strokeWidthLinearLayout);
@@ -490,13 +448,11 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         buttonColor = (FloatingActionButton) findViewById(R.id.buttonColor);
         buttonWidth = (FloatingActionButton) findViewById(R.id.buttonWidth);
         // buttonRedo & buttonUndo use only functions, don't need them
-
         //confirmSavingActionButton = (FloatingActionButton) findViewById(R.id.confirmSavingActionButton);
         //cancelSavingActionButton = (FloatingActionButton) findViewById(R.id.cancelSavingActionButton);
 
         createPolygonActionButton.setVisibility(View.GONE);
         strokeWidthLinearLayout.setVisibility(View.GONE);
-        saveFileLinearLayout.setVisibility(View.GONE);
         buttonColor.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(SettingsHolder.getInstance().getSettings().getStrokeWithOpacity())));
         buttonFill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(SettingsHolder.getInstance().getSettings().getFillWithOpacity())));
     }
@@ -592,15 +548,18 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 NewSvgFile();
                 return true;
             case R.id.save_svg:
-                SaveSvgFile();
+                SaveSvgFile(false);
                 return true;
             case R.id.open_svg:
-                OpenSvgFile();
+                CheckedOpenSvgFile();
                 return true;
             case R.id.open_bt_settings:
                 Intent intent = new Intent(this, BTSettingsActivity.class);
                 //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivityForResult(intent, REQUEST_CONNECT_DEVICE);
+                return true;
+            case R.id.exit:
+                ExitApp();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -608,34 +567,137 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     private void NewSvgFile(){
-        try {
-            drawingView.Restart();
-            drawingView.invalidate();
+        if ((savedElementInstance == null && !drawingView.GetSvgElements().isEmpty()) ||
+                (savedElementInstance != null &&
+                        !drawingView.GetSvgElements().isEmpty() &&
+                        !savedElementInstance.equals(drawingView.GetSvgElements()))) {
+            // Your changes will be lost if you don’t save them.
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    context);
+            alertDialogBuilder.setMessage(R.string.lbl_saveOrDiscard);
+            alertDialogBuilder.setCancelable(true);
+            alertDialogBuilder.setPositiveButton(R.string.btn_createNew, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    try {
+                        drawingView.Restart();
+                        drawingView.invalidate();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            alertDialogBuilder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    selectedDirectory = "";
+                    //saveFileLinearLayout.setVisibility(View.GONE);
+                    drawingView.setEnabled(true);
+                    if (isStrokeWidthButtonClicked)
+                        strokeWidthLinearLayout.setVisibility(View.VISIBLE);
+                }
+            });
+            alertDialogBuilder.setNegativeButton(R.string.btn_save, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    SaveSvgFile(true);
+                }
+            });
+
+            final AlertDialog dialog = alertDialogBuilder.create();
+            dialog.show();
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        else {
+            try {
+                drawingView.Restart();
+                drawingView.invalidate();
+                savedElementInstance = null;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void SaveSvgFile(){
-        File mPath = new File(rootDirectory);
-        FileDialog fileDialog = new FileDialog(this, mPath, ".sss");
-        fileDialog.setSelectDirectoryOption(true);
-        fileDialog.addDirectoryListener(new FileDialog.DirectorySelectedListener() {
-            public void directorySelected(File directory) {
-                if(isStrokeWidthButtonClicked)
-                    strokeWidthLinearLayout.setVisibility(View.GONE);
-                saveFileLinearLayout.setVisibility(View.VISIBLE);
-                drawingView.setEnabled(false);
-                selectedDirectory = directory.toString();
-                Log.d(getClass().getName(), "selected dir " + directory.toString());
+    private void SaveSvgFile(final boolean clean){
+        // custom dialog
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+        LayoutInflater inflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.dialog_save, null);
+        alertDialogBuilder.setTitle(R.string.title_saving);
+        alertDialogBuilder.setMessage(R.string.lbl_fileName);
+        alertDialogBuilder.setView(view);
+        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setPositiveButton(R.string.btn_save,  new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) { }
+        });
+        alertDialogBuilder.setNegativeButton(R.string.btn_cancel,  new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                selectedDirectory = "";
+                //saveFileLinearLayout.setVisibility(View.GONE);
+                drawingView.setEnabled(true);
+                if (isStrokeWidthButtonClicked)
+                    strokeWidthLinearLayout.setVisibility(View.VISIBLE);
             }
         });
-        fileDialog.showDialog();
+
+        // set the custom dialog components - editText and text
+        fileNameEditText = (EditText)view.findViewById(R.id.fileNameEditText);
+        errorMessageTextView = (TextView)view.findViewById(R.id.errorMessageTextView);
+        fileNameEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (IsAlphanumeric(s.toString())) errorMessageTextView.setText("");
+                else errorMessageTextView.setText(R.string.filename_error_message);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        final AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                // Send the positive button event back to the host activity
+                String fileName = fileNameEditText.getText().toString();
+
+                if(IsAlphanumeric(fileName)){
+                    if(fileName.length() <= 0){
+                        errorMessageTextView.setText(R.string.empty_filename);
+                    }
+                    else{
+                        SaveSvgFile(fileName);
+                        drawingView.setEnabled(true);
+                        if (clean) {
+                            drawingView.Restart();
+                            drawingView.invalidate();
+                            savedElementInstance = null;
+                        }
+                        else {
+                            savedElementInstance = new ArrayList<>();
+                            savedElementInstance.addAll(drawingView.GetSvgElements());
+                        }
+                        dialog.dismiss();
+                    }
+                }
+                else{
+                    errorMessageTextView.setText(R.string.filename_error_message);
+                }
+            }
+        });
     }
 
     private void SaveSvgFile(String fileName){
-        fileName = selectedDirectory + "/" + fileName + ".svg";
+        File mPath = new File(rootDirectory);
+        fileName = mPath + "/" + fileName + ".svg";
         String content = drawingView.GetSvgString();
         FileOutputStream outputStream;
 
@@ -651,6 +713,53 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         }
     }
 
+    private void CheckedOpenSvgFile() {
+        if ((savedElementInstance == null && !drawingView.GetSvgElements().isEmpty()) ||
+                (savedElementInstance != null &&
+                        !drawingView.GetSvgElements().isEmpty() &&
+                        !savedElementInstance.equals(drawingView.GetSvgElements()))) {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    context);
+            // Your changes will be lost if you don’t save them.
+            alertDialogBuilder.setMessage(R.string.lbl_saveOrDiscard);
+            alertDialogBuilder.setCancelable(true);
+            alertDialogBuilder.setPositiveButton(R.string.btn_open, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    try {
+                        OpenSvgFile();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            alertDialogBuilder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    selectedDirectory = "";
+                    //saveFileLinearLayout.setVisibility(View.GONE);
+                    drawingView.setEnabled(true);
+                    if (isStrokeWidthButtonClicked)
+                        strokeWidthLinearLayout.setVisibility(View.VISIBLE);
+                }
+            });
+            alertDialogBuilder.setNegativeButton(R.string.btn_save, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    SaveSvgFile(true);
+                }
+            });
+
+            final AlertDialog dialog = alertDialogBuilder.create();
+            dialog.show();
+        }
+        else {
+            try {
+                OpenSvgFile();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void OpenSvgFile(){
         File mPath = new File(rootDirectory);
         FileDialog fileDialog = new FileDialog(this, mPath);
@@ -659,8 +768,11 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             public void fileSelected(File file) {
                 Log.d(getClass().getName(), "selected file " + file.toString());
                 OpenSvgFile(file);
+                savedElementInstance = new ArrayList<>();
+                savedElementInstance.addAll(drawingView.GetSvgElements());
             }
         });
+
         fileDialog.showDialog();
     }
 
@@ -698,6 +810,55 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        }
+    }
+
+    private void ExitApp() {
+        if ((savedElementInstance == null && !drawingView.GetSvgElements().isEmpty()) ||
+                (savedElementInstance != null &&
+                        !drawingView.GetSvgElements().isEmpty() &&
+                        !savedElementInstance.equals(drawingView.GetSvgElements()))) {
+            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    context);
+            // Your changes will be lost if you don’t save them.
+            alertDialogBuilder.setMessage(R.string.lbl_saveOrDiscard);
+            alertDialogBuilder.setCancelable(true);
+            alertDialogBuilder.setPositiveButton(R.string.btn_exit, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    try {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            alertDialogBuilder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    selectedDirectory = "";
+                    //saveFileLinearLayout.setVisibility(View.GONE);
+                    drawingView.setEnabled(true);
+                    if (isStrokeWidthButtonClicked)
+                        strokeWidthLinearLayout.setVisibility(View.VISIBLE);
+                }
+            });
+            alertDialogBuilder.setNegativeButton(R.string.btn_save, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.dismiss();
+                    SaveSvgFile(true);
+                }
+            });
+
+            final AlertDialog dialog = alertDialogBuilder.create();
+            dialog.show();
+        }
+        else {
+            try {
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -784,7 +945,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             case LINE:
                 SetClickedButtonsBackground(buttonLine);
                 break;
-            case RECTAGLE:
+            case RECTANGLE:
                 SetClickedButtonsBackground(buttonShape);
                 break;
             case CIRCLE:
@@ -795,6 +956,9 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                 createPolygonActionButton.setVisibility(View.VISIBLE);
                 break;
         }
+
+        if (isFillableElement) buttonFill.setVisibility(View.VISIBLE);
+        else buttonFill.setVisibility(View.GONE);
 
         float strokeWidth = SettingsHolder.getInstance().getSettings().getStrokeWidth();
         if(strokeWidth == 1.0f)

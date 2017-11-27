@@ -3,10 +3,8 @@ package majapp.bluetoothpaint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.TextView;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -57,15 +55,8 @@ public class FileDialog {
     public Dialog createFileDialog() {
         Dialog dialog = null;
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        TextView textView = new TextView(activity);
-        textView.setTextColor(Color.BLACK);
-        if(selectDirectoryOption)
-            textView.setText("VÝBER PRIEČINKA:\n" + currentPath.getPath());
-        else
-            textView.setText("VÝBER SÚBORU:\n" + currentPath.getPath());
-        builder.setCustomTitle(textView);
+        builder.setTitle(R.string.title_opening);
 
-        //builder.setTitle("Výber priečinka:\n" + currentPath.getPath());
         if (selectDirectoryOption) {
             String folder = currentPath.getPath().substring(currentPath.getPath().lastIndexOf('/') + 1);
             builder.setPositiveButton("Vybrať priečinok " + folder, new DialogInterface.OnClickListener() {
@@ -86,6 +77,11 @@ public class FileDialog {
                     dialog.dismiss();
                     showDialog();
                 } else fireFileSelectedEvent(chosenFile);
+            }
+        });
+
+        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int i) {
             }
         });
 
