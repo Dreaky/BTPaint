@@ -20,88 +20,105 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/settingsActionButtons"
+            app:fabSize="normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_margin="10dp"
             android:alpha="1"
             android:clickable="true"
             android:onClick="settingsActionButtons_Click"
             android:src="@drawable/ic_settings_black_24dp"
             app:backgroundTint="@color/colorActionButton"
-            app:borderWidth="3dp" />
+            app:borderWidth="2dp"
+            android:focusable="true" />
 
         <LinearLayout
             android:id="@+id/menuSettingsItems"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="6dp"
-            android:layout_toRightOf="@id/settingsActionButtons"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@id/settingsActionButtons"
             android:orientation="horizontal"
             android:visibility="invisible">
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/buttonUndo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:alpha="1"
-                android:clickable="true"
-                android:onClick="undoActionButton_Click"
-                android:src="@drawable/ic_undo_black_24dp"
-                app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/buttonRedo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:alpha="1"
-                android:clickable="true"
-                android:onClick="redoActionButton_Click"
-                android:src="@drawable/ic_redo_black_24dp"
-                app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/buttonWidth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:alpha="1"
-                android:clickable="true"
-                android:onClick="strokeWidthButton_Click"
-                android:src="@drawable/custom_line_width"
-                app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/buttonColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="4dp"
-                android:alpha="1"
-                android:clickable="true"
-                android:onClick="strokeColorButton_Click"
-                android:src="@drawable/ic_custom_strokecolor_white"
-                app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
-
-            <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonFill"
+                app:fabSize="mini"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
                 android:alpha="1"
                 android:clickable="true"
                 android:visibility="visible"
                 android:onClick="fillColorButton_Click"
                 android:src="@drawable/ic_custom_fillcolor_black"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
+                app:borderWidth="2dp"
+                android:focusable="true" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/buttonColor"
+                app:fabSize="mini"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="strokeColorButton_Click"
+                android:src="@drawable/ic_custom_strokecolor_white"
+                app:backgroundTint="@color/colorDrawButtonNotClicked"
+                app:borderWidth="2dp"
+                android:focusable="true" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/buttonWidth"
+                app:fabSize="mini"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="strokeWidthButton_Click"
+                android:src="@drawable/custom_line_width"
+                app:backgroundTint="@color/colorDrawButtonNotClicked"
+                app:borderWidth="2dp"
+                android:focusable="true" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/buttonRedo"
+                app:fabSize="mini"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="redoActionButton_Click"
+                android:src="@drawable/ic_redo_black_24dp"
+                app:backgroundTint="@color/colorDrawButtonNotClicked"
+                app:borderWidth="2dp"
+                android:focusable="true" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/buttonUndo"
+                app:fabSize="mini"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="8dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="undoActionButton_Click"
+                android:src="@drawable/ic_undo_black_24dp"
+                app:backgroundTint="@color/colorDrawButtonNotClicked"
+                app:borderWidth="2dp"
+                android:focusable="true" />
 
         </LinearLayout>
 
@@ -112,7 +129,7 @@
             android:layout_alignStart="@+id/menuSettingsItems"
             android:layout_below="@+id/menuSettingsItems"
             android:orientation="horizontal"
-            android:visibility="visible"
+            android:visibility="invisible"
             android:weightSum="1">
 
             <ImageButton
@@ -124,7 +141,8 @@
                 android:backgroundTint="@color/colorDrawButtonClicked"
                 android:clickable="true"
                 android:onClick="strokeWidth1Button_Click"
-                android:src="@drawable/custom_line_1" />
+                android:src="@drawable/custom_line_1"
+                android:focusable="true" />
 
             <ImageButton
                 android:id="@+id/strokeWidth2Button"
@@ -135,7 +153,8 @@
                 android:backgroundTint="@color/colorDrawButtonNotClicked"
                 android:clickable="true"
                 android:onClick="strokeWidth2Button_Click"
-                android:src="@drawable/custom_line_2" />
+                android:src="@drawable/custom_line_2"
+                android:focusable="true" />
 
             <ImageButton
                 android:id="@+id/strokeWidth3Button"
@@ -146,7 +165,8 @@
                 android:backgroundTint="@color/colorDrawButtonNotClicked"
                 android:clickable="true"
                 android:onClick="strokeWidth3Button_Click"
-                android:src="@drawable/custom_line_3" />
+                android:src="@drawable/custom_line_3"
+                android:focusable="true" />
 
             <ImageButton
                 android:id="@+id/strokeWidth4Button"
@@ -171,166 +191,123 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/toolsActionButton"
+            app:fabSize="normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_margin="10dp"
             android:alpha="1"
             android:clickable="true"
             android:onClick="toolsActionButton_Click"
             android:src="@drawable/custom_path"
             app:backgroundTint="@color/colorActionButton"
-            app:borderWidth="3dp" />
+            app:borderWidth="2dp"
+            android:focusable="true" />
 
         <LinearLayout
             android:id="@+id/menuDrawingItems"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="6dp"
-            android:layout_toLeftOf="@id/toolsActionButton"
+            android:layout_marginBottom="10dp"
+            android:layout_toStartOf="@id/toolsActionButton"
             android:orientation="horizontal"
             android:visibility="invisible" >
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonPencil"
+                app:fabSize="mini"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="drawPathButton_Click"
                 android:src="@drawable/custom_path"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
+                app:borderWidth="2dp"
+                android:focusable="true" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonLine"
+                app:fabSize="mini"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="drawLineButton_Click"
                 android:src="@drawable/custom_diagonal_line"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
+                app:borderWidth="2dp"
+                android:focusable="true" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonShape"
+                app:fabSize="mini"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="drawRectangleButton_Click"
                 android:src="@drawable/custom_rectangle"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
+                app:borderWidth="2dp"
+                android:focusable="true" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonCircle"
+                app:fabSize="mini"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="drawCircleButton_Click"
                 android:src="@drawable/custom_circle"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
+                app:borderWidth="2dp"
+                android:focusable="true" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/buttonPolygon"
+                app:fabSize="mini"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
                 android:alpha="1"
                 android:clickable="true"
                 android:onClick="drawPolygonButton_Click"
                 android:src="@drawable/custom_polygon"
                 app:backgroundTint="@color/colorDrawButtonNotClicked"
-                app:borderWidth="3dp" />
+                app:borderWidth="2dp"
+                android:focusable="true" />
 
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/createPolygonActionButton"
+            app:fabSize="mini"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/toolsActionButton"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="18dp"
             android:alpha="1"
             android:clickable="true"
             android:visibility="invisible"
             android:onClick="createPolygonActionButton_Click"
             android:src="@drawable/ok_mark"
             app:backgroundTint="#00BB00"
-            app:borderWidth="3dp" />
-
-        <LinearLayout
-            android:id="@+id/saveFileLinearLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="20dp"
-            android:background="#DDDDDD"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Názov SVG súboru:" />
-
-            <EditText
-                android:id="@+id/fileNameEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:hint="@string/hint" />
-
-            <TextView
-                android:id="@+id/errorMessageTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:textColor="#FF0000" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:orientation="horizontal">
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/confirmSavingActionButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginRight="12dp"
-                    android:alpha="1"
-                    android:clickable="true"
-                    android:onClick="confirmSavingActionButton_Click"
-                    android:src="@drawable/ok_mark"
-                    app:backgroundTint="#00BB00" />
-
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/cancelSavingActionButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="10dp"
-                    android:alpha="1"
-                    android:clickable="true"
-                    android:onClick="cancelSavingActionButton_Click"
-                    android:src="@drawable/custom_close_cross"
-                    app:backgroundTint="#DD0000" />
-            </LinearLayout>
-
-        </LinearLayout>
+            app:borderWidth="2dp"
+            android:focusable="true" />
 
     </RelativeLayout>
 
