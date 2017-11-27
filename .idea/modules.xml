@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/BTPaint.iml" filepath="$PROJECT_DIR$/BTPaint.iml" />
       <module fileurl="file://$PROJECT_DIR$/BlPaint.iml" filepath="$PROJECT_DIR$/BlPaint.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
