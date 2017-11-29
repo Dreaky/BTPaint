@@ -1,5 +1,6 @@
 package majapp.bluetoothpaint;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -26,6 +27,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -42,8 +45,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
+
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 public class MainActivity extends AppCompatActivity implements ColorPickerDialogListener {
     private static final int REQUEST_CONNECT_DEVICE = 10;
@@ -61,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private LinearLayout strokeWidthLinearLayout;
 
     private FloatingActionButton toolsActionButton;
-    private FloatingActionButton settingActionButton;
     private FloatingActionButton createPolygonActionButton;
 
     // right side menu
@@ -84,11 +87,15 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private ImageButton strokeWidth5Button;
 
     private boolean isFillableElement = false;
+    private boolean isPolygon = false;
     private boolean isStrokeWidthButtonClicked = false;
-    private List<String> savedElementInstance = null;
+    private boolean isSettingMenuOpened = false;
+    private boolean isDrawingMenuOpened = false;
+    private boolean isFullscreen = false;
+    private String drawingItem;
+    private ArrayList<String> savedElementInstance = null;
 
     private String rootDirectory;
-    private String selectedDirectory = "";
 
     //Name of the connected device
     private String connectedDeviceName = null;
@@ -100,6 +107,16 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (savedInstanceState != null) {
+            isFillableElement = savedInstanceState.getBoolean("isFillableElement");
+            isStrokeWidthButtonClicked = savedInstanceState.getBoolean("isStrokeWidthButtonClicked");
+            isDrawingMenuOpened = savedInstanceState.getBoolean("isDrawingMenuOpened");
+            isSettingMenuOpened = savedInstanceState.getBoolean("isSettingMenuOpened");
+            isPolygon = savedInstanceState.getBoolean("isPolygon");
+            isFullscreen = savedInstanceState.getBoolean("isFullscreen");
+            savedElementInstance = savedInstanceState.getStringArrayList("savedElementInstance");
+            drawingItem = savedInstanceState.getString("drawingItem");
+        }
 
         InitializeSettings();
         InitializeViews();
@@ -169,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
     // region BT handler
     private String receivedXmlElement = "";
+    @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -199,13 +217,17 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                             receivedXmlElement += readMessage;
                         else{
                             receivedXmlElement += readMessage;
-                            if(receivedXmlElement.equals(Constants.UNDO))
-                                drawingView.Undo();
-                            else if(receivedXmlElement.equals(Constants.REDO))
-                                drawingView.Redo();
-                            else {
-                                drawingView.AddSvgElement(receivedXmlElement);
-                                drawingView.invalidate();
+                            switch (receivedXmlElement) {
+                                case Constants.UNDO:
+                                    drawingView.Undo();
+                                    break;
+                                case Constants.REDO:
+                                    drawingView.Redo();
+                                    break;
+                                default:
+                                    drawingView.AddSvgElement(receivedXmlElement);
+                                    drawingView.invalidate();
+                                    break;
                             }
                             receivedXmlElement = "";
                         }
@@ -224,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     };
     // endregion
 
+    @SuppressLint("RestrictedApi")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -241,9 +264,11 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void toolsActionButton_Click(View view) {
         if (menuDrawingItems.getVisibility() == View.VISIBLE) {
             menuDrawingItems.setVisibility(View.GONE);
+            isDrawingMenuOpened = false;
         }
         else {
             menuDrawingItems.setVisibility(View.VISIBLE);
+            isDrawingMenuOpened = true;
         }
     }
 
@@ -259,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         toolsActionButton.setImageResource(R.drawable.custom_path);
         createPolygonActionButton.setVisibility(View.GONE);
         menuDrawingItems.setVisibility(View.GONE);
+        isDrawingMenuOpened = false;
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             buttonFill.setVisibility(View.INVISIBLE);
         }
@@ -273,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         toolsActionButton.setImageResource(R.drawable.custom_diagonal_line);
         createPolygonActionButton.setVisibility(View.GONE);
         menuDrawingItems.setVisibility(View.GONE);
+        isDrawingMenuOpened = false;
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             buttonFill.setVisibility(View.INVISIBLE);
         }
@@ -286,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         toolsActionButton.setImageResource(R.drawable.custom_rectangle);
         createPolygonActionButton.setVisibility(View.GONE);
         menuDrawingItems.setVisibility(View.GONE);
+        isDrawingMenuOpened = false;
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             buttonFill.setVisibility(View.VISIBLE);
         }
@@ -299,6 +327,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         toolsActionButton.setImageResource(R.drawable.custom_circle);
         createPolygonActionButton.setVisibility(View.GONE);
         menuDrawingItems.setVisibility(View.GONE);
+        isDrawingMenuOpened = false;
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             buttonFill.setVisibility(View.VISIBLE);
         }
@@ -311,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         toolsActionButton.setImageResource(R.drawable.custom_polygon);
         createPolygonActionButton.setVisibility(View.VISIBLE);
         menuDrawingItems.setVisibility(View.GONE);
+        isDrawingMenuOpened = false;
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             buttonFill.setVisibility(View.VISIBLE);
         }
@@ -321,11 +351,13 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void settingsActionButtons_Click(View view) {
         if (menuSettingsItems.getVisibility() == View.VISIBLE) {
             menuSettingsItems.setVisibility(View.GONE);
+            isSettingMenuOpened = false;
             if (isStrokeWidthButtonClicked)
                 strokeWidthLinearLayout.setVisibility(View.GONE);
         }
         else {
             menuSettingsItems.setVisibility(View.VISIBLE);
+            isSettingMenuOpened = true;
             if (isFillableElement) {
                 buttonFill.setVisibility(View.VISIBLE);
             }
@@ -335,13 +367,16 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         }
     }
 
-
     public void undoActionButton_Click(View view){
         drawingView.Undo();
     }
 
     public void redoActionButton_Click(View view){
-        drawingView.Redo(); //todo: dokoncit funkciu
+        drawingView.Redo();
+    }
+
+    public void fullscreenActionButton_Click(View view) {
+        switchFullscreen();
     }
 
     public void strokeColorButton_Click(View view) {
@@ -443,7 +478,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         buttonPolygon = (FloatingActionButton) findViewById(R.id.buttonPolygon);
         createPolygonActionButton = (FloatingActionButton) findViewById(R.id.createPolygonActionButton);
 
-        settingActionButton = (FloatingActionButton) findViewById(R.id.settingsActionButtons);
         buttonFill = (FloatingActionButton) findViewById(R.id.buttonFill);
         buttonColor = (FloatingActionButton) findViewById(R.id.buttonColor);
         buttonWidth = (FloatingActionButton) findViewById(R.id.buttonWidth);
@@ -453,6 +487,14 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
         createPolygonActionButton.setVisibility(View.GONE);
         strokeWidthLinearLayout.setVisibility(View.GONE);
+        menuSettingsItems.setVisibility(View.GONE);
+        menuDrawingItems.setVisibility(View.GONE);
+        showSystemUI();
+        if (isPolygon) createPolygonActionButton.setVisibility(View.VISIBLE);
+        if (isSettingMenuOpened) menuSettingsItems.setVisibility(View.VISIBLE);
+        if (isDrawingMenuOpened) menuDrawingItems.setVisibility(View.VISIBLE);
+        if (isStrokeWidthButtonClicked && isSettingMenuOpened) strokeWidthLinearLayout.setVisibility(View.VISIBLE);
+        if (isFullscreen) hideSystemUI();
         buttonColor.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(SettingsHolder.getInstance().getSettings().getStrokeWithOpacity())));
         buttonFill.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(SettingsHolder.getInstance().getSettings().getFillWithOpacity())));
     }
@@ -588,7 +630,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             });
             alertDialogBuilder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    selectedDirectory = "";
                     //saveFileLinearLayout.setVisibility(View.GONE);
                     drawingView.setEnabled(true);
                     if (isStrokeWidthButtonClicked)
@@ -632,7 +673,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         });
         alertDialogBuilder.setNegativeButton(R.string.btn_cancel,  new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                selectedDirectory = "";
                 //saveFileLinearLayout.setVisibility(View.GONE);
                 drawingView.setEnabled(true);
                 if (isStrokeWidthButtonClicked)
@@ -734,7 +774,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             });
             alertDialogBuilder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    selectedDirectory = "";
                     //saveFileLinearLayout.setVisibility(View.GONE);
                     drawingView.setEnabled(true);
                     if (isStrokeWidthButtonClicked)
@@ -785,10 +824,9 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                         .setTitle(R.string.error)
                         .setMessage(R.string.unsupported_file_format)
                         .setCancelable(false)
-                        .setPositiveButton("beriem na vedomie", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("beriem na vedomie", new DialogInterface.OnClickListener() { //todo: beriem na vedomie presunut do strings
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                return;
                             }
                         }).show();
             }
@@ -836,7 +874,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             });
             alertDialogBuilder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    selectedDirectory = "";
                     //saveFileLinearLayout.setVisibility(View.GONE);
                     drawingView.setEnabled(true);
                     if (isStrokeWidthButtonClicked)
@@ -865,8 +902,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     private String GetFileExtension(File file){
         String fileName = file.toString();
-        String result = fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
-        return result;
+        return fileName.substring(fileName.lastIndexOf(".")).toLowerCase();
     }
 
     private boolean IsAlphanumeric(String string){
@@ -929,10 +965,73 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putBoolean("isFillableElement", isFillableElement);
+        outState.putBoolean("isStrokeWidthButtonClicked", isStrokeWidthButtonClicked);
+        outState.putBoolean("isDrawingMenuOpened", isDrawingMenuOpened);
+        outState.putBoolean("isSettingMenuOpened", isSettingMenuOpened);
+        outState.putBoolean("isPolygon", isPolygon);
+        outState.putBoolean("isFullscreen", isFullscreen);
+        outState.putStringArrayList("savedElementInstance", savedElementInstance);
+        outState.putString("drawingItem", drawingItem);
+
         if(SettingsHolder.getInstance().getSettings() == null)
             return;
         SettingsHolder.getInstance().getSettings().setSvgElements(drawingView.GetSvgElements());
     }
+
+    // region fullscreen
+    private void switchFullscreen() {
+        if (isFullscreen) {
+            showSystemUI();
+            isFullscreen = false;
+        }
+        else {
+            hideSystemUI();
+            isFullscreen = true;
+        }
+    }
+
+    // This snippet hides the system bars.
+    private void hideSystemUI() {
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+        else {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    // This snippet shows the system bars. It does this by removing all the flags
+    // except for the ones that make the content appear under the system bars.
+    private void showSystemUI() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
+        else {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
+    }
+    // endregion
 
     private void InitializeUserSettings(){
         if(SettingsHolder.getInstance().getSettings() == null)

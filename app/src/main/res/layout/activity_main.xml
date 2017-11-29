@@ -121,6 +121,21 @@
                 app:borderWidth="2dp"
                 android:focusable="true" />
 
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/buttonFullscreen"
+                app:fabSize="mini"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                android:alpha="1"
+                android:clickable="true"
+                android:onClick="fullscreenActionButton_Click"
+                android:src="@drawable/ic_fullscreen_black_24dp"
+                app:backgroundTint="@color/colorDrawButtonNotClicked"
+                app:borderWidth="2dp"
+                android:focusable="true" />
+
         </LinearLayout>
 
         <LinearLayout
