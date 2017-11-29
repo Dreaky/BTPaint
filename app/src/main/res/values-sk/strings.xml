@@ -1,6 +1,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">BT plátno</string>
+    <string name="approval">Beriem na vedomie</string>
     <string name="bluetooth">Režim zdieľanej obrazovky</string>
     <string name="bt_newDevices">Dostupné zariadenia</string>
     <string name="bt_noNewDevices">Nenašli sa žiadne nové zariadenia</string>

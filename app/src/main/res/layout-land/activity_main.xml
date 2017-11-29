@@ -19,7 +19,7 @@
             android:layout_height="match_parent" />
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/settingsActionButtons"
+            android:id="@+id/settingsActionButton"
             app:fabSize="normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             android:layout_width="56dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_above="@+id/settingsActionButtons"
+            android:layout_above="@+id/settingsActionButton"
             android:layout_alignParentStart="true"
             android:layout_marginStart="10dp"
             android:visibility="invisible">
@@ -142,7 +142,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/menuSettingsItems"
-            android:layout_toEndOf="@+id/settingsActionButtons"
+            android:layout_toEndOf="@+id/settingsActionButton"
             android:orientation="vertical"
             android:visibility="invisible"
             android:weightSum="1">

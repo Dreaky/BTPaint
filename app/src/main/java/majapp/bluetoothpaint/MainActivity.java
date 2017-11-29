@@ -27,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -64,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private LinearLayout menuSettingsItems;
     private LinearLayout strokeWidthLinearLayout;
 
+    private FloatingActionButton settingsActionButton;
     private FloatingActionButton toolsActionButton;
     private FloatingActionButton createPolygonActionButton;
 
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     private boolean isSettingMenuOpened = false;
     private boolean isDrawingMenuOpened = false;
     private boolean isFullscreen = false;
-    private String drawingItem;
+    private int drawingItemIcon = R.drawable.custom_path;
     private ArrayList<String> savedElementInstance = null;
 
     private String rootDirectory;
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
             isPolygon = savedInstanceState.getBoolean("isPolygon");
             isFullscreen = savedInstanceState.getBoolean("isFullscreen");
             savedElementInstance = savedInstanceState.getStringArrayList("savedElementInstance");
-            drawingItem = savedInstanceState.getString("drawingItem");
+            drawingItemIcon = savedInstanceState.getInt("drawingItemIcon");
         }
 
         InitializeSettings();
@@ -279,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void drawPathButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
         isFillableElement = false;
+        drawingItemIcon = R.drawable.custom_path;
         SetClickedButtonsBackground(buttonPencil);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.PATH);
         toolsActionButton.setImageResource(R.drawable.custom_path);
@@ -294,6 +295,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void drawLineButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
         isFillableElement = false;
+        drawingItemIcon = R.drawable.custom_diagonal_line;
         SetClickedButtonsBackground(buttonLine);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.LINE);
         toolsActionButton.setImageResource(R.drawable.custom_diagonal_line);
@@ -308,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void drawRectangleButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
         isFillableElement = true;
+        drawingItemIcon = R.drawable.custom_rectangle;
         SetClickedButtonsBackground(buttonShape);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.RECTANGLE);
         toolsActionButton.setImageResource(R.drawable.custom_rectangle);
@@ -322,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     public void drawCircleButton_Click(View view) {
         drawingView.ClearPolygonPointsList();
         isFillableElement = true;
+        drawingItemIcon = R.drawable.custom_circle;
         SetClickedButtonsBackground(buttonCircle);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.CIRCLE);
         toolsActionButton.setImageResource(R.drawable.custom_circle);
@@ -335,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
 
     public void drawPolygonButton_Click(View view) {
         isFillableElement = true;
+        drawingItemIcon = R.drawable.custom_polygon;
         SetClickedButtonsBackground(buttonPolygon);
         SettingsHolder.getInstance().getSettings().setShape(ShapesEnum.POLYGON);
         toolsActionButton.setImageResource(R.drawable.custom_polygon);
@@ -457,7 +462,6 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         drawingView = (DrawingView)findViewById(R.id.drawingView);
 
         //Layouts
-        //saveFileLinearLayout = (LinearLayout) findViewById(R.id.saveFileLinearLayout);
         menuDrawingItems = (LinearLayout) findViewById(R.id.menuDrawingItems);
         menuSettingsItems = (LinearLayout) findViewById(R.id.menuSettingsItems);
         strokeWidthLinearLayout = (LinearLayout) findViewById(R.id.strokeWidthLinearLayout);
@@ -470,6 +474,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         strokeWidth5Button= (ImageButton)findViewById(R.id.strokeWidth5Button);
 
         //Action buttons
+        settingsActionButton = (FloatingActionButton) findViewById(R.id.settingsActionButton);
         toolsActionButton = (FloatingActionButton) findViewById(R.id.toolsActionButton);
         buttonPencil = (FloatingActionButton) findViewById(R.id.buttonPencil);
         buttonLine = (FloatingActionButton) findViewById(R.id.buttonLine);
@@ -481,15 +486,15 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         buttonFill = (FloatingActionButton) findViewById(R.id.buttonFill);
         buttonColor = (FloatingActionButton) findViewById(R.id.buttonColor);
         buttonWidth = (FloatingActionButton) findViewById(R.id.buttonWidth);
-        // buttonRedo & buttonUndo use only functions, don't need them
-        //confirmSavingActionButton = (FloatingActionButton) findViewById(R.id.confirmSavingActionButton);
-        //cancelSavingActionButton = (FloatingActionButton) findViewById(R.id.cancelSavingActionButton);
 
         createPolygonActionButton.setVisibility(View.GONE);
         strokeWidthLinearLayout.setVisibility(View.GONE);
         menuSettingsItems.setVisibility(View.GONE);
         menuDrawingItems.setVisibility(View.GONE);
-        showSystemUI();
+        settingsActionButton.setVisibility(View.VISIBLE);
+        toolsActionButton.setVisibility(View.VISIBLE);
+        toolsActionButton.setImageResource(drawingItemIcon);
+        //showSystemUI();
         if (isPolygon) createPolygonActionButton.setVisibility(View.VISIBLE);
         if (isSettingMenuOpened) menuSettingsItems.setVisibility(View.VISIBLE);
         if (isDrawingMenuOpened) menuDrawingItems.setVisibility(View.VISIBLE);
@@ -824,7 +829,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
                         .setTitle(R.string.error)
                         .setMessage(R.string.unsupported_file_format)
                         .setCancelable(false)
-                        .setPositiveButton("beriem na vedomie", new DialogInterface.OnClickListener() { //todo: beriem na vedomie presunut do strings
+                        .setPositiveButton(R.string.approval, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                             }
@@ -922,15 +927,19 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
     }
 
     private void TurnOnIWantToStareMode(){
-        if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
-            createPolygonActionButton.setVisibility(View.GONE);
+        createPolygonActionButton.setVisibility(View.GONE);
+        strokeWidthLinearLayout.setVisibility(View.GONE);
+        menuSettingsItems.setVisibility(View.GONE);
+        menuDrawingItems.setVisibility(View.GONE);
+        settingsActionButton.setVisibility(View.GONE);
         toolsActionButton.setVisibility(View.GONE);
     }
 
     private void TurnOnIWantToDrawMode(){
-        if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
+        InitializeViews();
+        /*if(SettingsHolder.getInstance().getSettings().getShape() == ShapesEnum.POLYGON)
             createPolygonActionButton.setVisibility(View.VISIBLE);
-        toolsActionButton.setVisibility(View.VISIBLE);
+        toolsActionButton.setVisibility(View.VISIBLE);*/
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -972,7 +981,7 @@ public class MainActivity extends AppCompatActivity implements ColorPickerDialog
         outState.putBoolean("isPolygon", isPolygon);
         outState.putBoolean("isFullscreen", isFullscreen);
         outState.putStringArrayList("savedElementInstance", savedElementInstance);
-        outState.putString("drawingItem", drawingItem);
+        outState.putInt("drawingItemIcon", drawingItemIcon);
 
         if(SettingsHolder.getInstance().getSettings() == null)
             return;

@@ -1,6 +1,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">BT paint</string>
+    <string name="approval">I take that note</string>
     <string name="bluetooth">Shared screen</string>
     <string name="bt_newDevices">New devices</string>
     <string name="bt_noNewDevices">No new devices found</string>
