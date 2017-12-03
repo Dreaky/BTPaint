@@ -52,12 +52,9 @@ public class DrawingView extends View
     private final float MIN_ZOOM = 0.3f;
     private final float MAX_ZOOM = 5f;
 
-
     private String svgHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?><!-- Generator: Adobe Illustrator 13.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 14948)  --><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg version=\"1.1\" id=\"Layer_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\t width=\"0px\" height=\"0px\" viewBox=\"0 0 0 0\" enable-background=\"new 0 0 0 0\" xml:space=\"preserve\"><g id=\"android\">";
     private String svgElement = "";
     private String svgFoot = "\n</g></svg>";
-
-
 
     public DrawingView(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -85,7 +82,6 @@ public class DrawingView extends View
         drawPaint.setStrokeWidth(5);
         drawPaint.setStyle(Paint.Style.FILL);
         drawPaint.setColor(paintColor);
-
     }
 
     public void SetBluetoothService(BluetoothService service){
@@ -142,9 +138,11 @@ public class DrawingView extends View
         if(!isEnabled())
             return true;
 
-        if(SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
-                !SettingsHolder.getInstance().getSettings().getSendData())
-            return true;
+        boolean watching = SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
+                !SettingsHolder.getInstance().getSettings().getSendData();
+//        if(SettingsHolder.getInstance().getSettings().getIsTurnedOn() &&
+//                !SettingsHolder.getInstance().getSettings().getSendData())
+//            return true;
 
         if(SettingsHolder.getInstance().getSettings().getShape() != ShapesEnum.POLYGON) {
             scaleGestureDetector.onTouchEvent(event);
@@ -157,7 +155,7 @@ public class DrawingView extends View
                     startX = canvasClipX + event.getX() / scaleFactor;
                     startY = canvasClipY + event.getY() / scaleFactor;
 
-                    if(!isScaling)
+                    if(!isScaling && !watching)
                         points = "M" + startX + "," + startY;
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -165,14 +163,15 @@ public class DrawingView extends View
                     endY = canvasClipY + event.getY() / scaleFactor;
                     points += "L" + endX + "," + endY;
 
-                    if(!isScaling)
+                    if(!isScaling && !watching)
                         UpdateSvgBody();
                     break;
                 case MotionEvent.ACTION_UP:
                     if (isScaling)
                         isScaling=false;
                     else
-                        AddSvgElement();
+                        if(!watching)
+                            AddSvgElement();
                     break;
                 default:
                     return false;
