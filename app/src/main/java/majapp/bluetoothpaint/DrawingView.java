@@ -179,16 +179,19 @@ public class DrawingView extends View
         }
         // zadavanie bodov polygonu
         else{
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    startX = canvasClipX + event.getX()/scaleFactor;
-                    startY = canvasClipY + event.getY()/scaleFactor;
-                    break;
-                case MotionEvent.ACTION_UP:
-                    polygonPoints.add(new PointF(startX, startY));
-                    break;
-                default:
-                    return false;
+            if(!watching)
+            {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = canvasClipX + event.getX()/scaleFactor;
+                        startY = canvasClipY + event.getY()/scaleFactor;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        polygonPoints.add(new PointF(startX, startY));
+                        break;
+                    default:
+                        return false;
+                }
             }
         }
 
